@@ -11,3 +11,7 @@
 #10 C:\wamp\www\troca_jogos\libs\Slim\Slim.php(1254): Slim\Middleware\PrettyExceptions->call()
 #11 C:\wamp\www\troca_jogos\prototipo\index.php(345): Slim\Slim->run()
 #12 {main}</pre></body></html>
+
+<?php
+	echo '<br>teste';
+?>
