@@ -118,18 +118,40 @@ class DbHandler {
         return $num_rows > 0;
     }
 
+	
+	
+	public function getUserById($id_usuario) {
+        $stmt = $this->conn->prepare("SELECT id_usuario, nome, email, chave_api FROM usuario WHERE id_usuario = ?");
+        $stmt->bind_param("i", $id_usuario);
+        if ($stmt->execute()) {
+            // $user = $stmt->get_result()->fetch_assoc();
+            $stmt->bind_result($id_usuario, $name, $email, $api_key);
+            $stmt->fetch();
+            $user = array();
+			$user["id_usuario"] = $id_usuario;
+            $user["name"] = $name;
+            $user["email"] = $email;
+            $user["api_key"] = $api_key;
+            $stmt->close();
+            return $user;
+        } else {
+            return NULL;
+        }
+    }
+	
     /**
      * Fetching user by email
      * @param String $email User email id
      */
     public function getUserByEmail($email) {
-        $stmt = $this->conn->prepare("SELECT nome, email, chave_api FROM usuario WHERE email = ?");
+        $stmt = $this->conn->prepare("SELECT id_usuario, nome, email, chave_api FROM usuario WHERE email = ?");
         $stmt->bind_param("s", $email);
         if ($stmt->execute()) {
             // $user = $stmt->get_result()->fetch_assoc();
-            $stmt->bind_result($name, $email, $api_key);
+            $stmt->bind_result($id_usuario, $name, $email, $api_key);
             $stmt->fetch();
             $user = array();
+			$user["id_usuario"] = $id_usuario;
             $user["name"] = $name;
             $user["email"] = $email;
             $user["api_key"] = $api_key;

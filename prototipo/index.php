@@ -104,6 +104,8 @@ $app->post('/register', function() use ($app) {
  * params - email, password
  */
 $app->post('/login', function() use ($app) {
+			global $user_id;
+			
             // check for required params
             verifyRequiredParams(array('email', 'senha'));
 
@@ -119,10 +121,15 @@ $app->post('/login', function() use ($app) {
                 $user = $db->getUserByEmail($email);
 
                 if ($user != NULL) {
-                    $response["error"] = false;
+					/*
                     $response['name'] = $user['name'];
                     $response['email'] = $user['email'];
-                    $response['apikey'] = $user['api_key'];
+                    */
+					$response["error"] = false;
+					$response['id_usuario'] = $user['id_usuario'];
+					$response['apikey'] = $user['api_key'];
+					
+					$user_id = $user['id_usuario'];
                 } else {
                     // unknown error occurred
                     $response['error'] = true;
@@ -137,6 +144,36 @@ $app->post('/login', function() use ($app) {
             echoRespnse(200, $response);
         });
 
+		
+		
+$app->get('/usuario/:id', 'authenticate', function($id_usuario) {
+            //global $user_id;
+            $response = array();
+            $db = new DbHandler();
+
+            // fetch task
+            $result = $db->getUserById($id_usuario);
+
+            if ($result != NULL) {
+				/*
+                $response["error"] = false;
+                $response["id"] = $result["id"];
+                $response["task"] = $result["task"];
+                $response["status"] = $result["status"];
+                $response["createdAt"] = $result["created_at"];
+				*/
+				$response["error"] = false;
+				$response['name'] = $result['name'];
+				$response['email'] = $result['email'];
+				$response['apikey'] = $result['api_key'];
+                echoRespnse(200, $response);
+            } else {
+                $response["error"] = true;
+                $response["message"] = "O usuário informado não existe!";
+                echoRespnse(200, $response);
+            }
+        });
+		
 /*
  * ------------------------ METHODS WITH AUTHENTICATION ------------------------
  */
