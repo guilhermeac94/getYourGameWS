@@ -129,9 +129,9 @@ class DbHandler {
             $stmt->fetch();
             $user = array();
 			$user["id_usuario"] = $id_usuario;
-            $user["name"] = $name;
+            $user["nome"] = $name;
             $user["email"] = $email;
-            $user["api_key"] = $api_key;
+            $user["chave_api"] = $api_key;
             $stmt->close();
             return $user;
         } else {
@@ -152,9 +152,9 @@ class DbHandler {
             $stmt->fetch();
             $user = array();
 			$user["id_usuario"] = $id_usuario;
-            $user["name"] = $name;
+            $user["nome"] = $name;
             $user["email"] = $email;
-            $user["api_key"] = $api_key;
+            $user["chave_api"] = $api_key;
             $stmt->close();
             return $user;
         } else {

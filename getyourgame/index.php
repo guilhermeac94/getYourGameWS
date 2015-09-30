@@ -85,7 +85,7 @@ $app->post('/register', function() use ($app) {
             if ($res == USER_CREATED_SUCCESSFULLY) {
                 $response["error"] = false;
                 $response["message"] = "Usuário registrado com sucesso!";
-				$response["name"] = $name;
+				$response["nome"] = $name;
             } else if ($res == USER_CREATE_FAILED) {
                 $response["error"] = true;
                 $response["message"] = "Um erro ocorreu durante o cadastro!";
@@ -127,7 +127,7 @@ $app->post('/login', function() use ($app) {
                     */
 					$response["error"] = false;
 					$response['id_usuario'] = $user['id_usuario'];
-					$response['apikey'] = $user['api_key'];
+					$response['chave_api'] = $user['chave_api'];
 					
 					$user_id = $user['id_usuario'];
                 } else {
@@ -163,9 +163,9 @@ $app->get('/usuario/:id', 'authenticate', function($id_usuario) {
                 $response["createdAt"] = $result["created_at"];
 				*/
 				$response["error"] = false;
-				$response['name'] = $result['name'];
+				$response['nome'] = $result['nome'];
 				$response['email'] = $result['email'];
-				$response['apikey'] = $result['api_key'];
+				$response['chave_api'] = $result['chave_api'];
                 echoRespnse(200, $response);
             } else {
                 $response["error"] = true;
