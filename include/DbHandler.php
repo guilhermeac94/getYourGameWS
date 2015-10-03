@@ -199,6 +199,24 @@ class DbHandler {
         }
     }
 
+	
+    public function getTodosEstadoJogo() {
+        $stmt = $this->conn->prepare("SELECT id_estado_jogo, descricao FROM estado_jogo");
+		$stmt->execute();
+        $estados = $stmt->get_result();
+        $stmt->close();
+		
+		$response = array();
+		            
+		while ($estado = $estados->fetch_assoc()) {
+			$estado_jogo = array();
+			$estado_jogo["id_estado_jogo"] = $estado["id_estado_jogo"];
+			$estado_jogo["descricao"] = $estado["descricao"];
+			array_push($response, $estado_jogo);
+		}
+		return $response;
+    }
+	
     /**
      * Validating user api key
      * If the api key is there in db, it is a valid key

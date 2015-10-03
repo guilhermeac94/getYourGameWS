@@ -174,6 +174,19 @@ $app->get('/usuario/:id', 'authenticate', function($id_usuario) {
             }
         });
 		
+		
+//$app->get('/usuario/:id', 'authenticate', function() {
+$app->get('/estado_jogo', function() use ($app) {
+            //global $user_id;
+            $response = array();
+			$db = new DbHandler();
+
+            // fetch task
+            $response = $db->getTodosEstadoJogo();
+			
+			echoRespnse(200, $response);
+		});
+		
 /*
  * ------------------------ METHODS WITH AUTHENTICATION ------------------------
  */
