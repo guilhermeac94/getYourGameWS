@@ -217,6 +217,38 @@ class DbHandler {
 		return $response;
     }
 	
+	public function getTodosCadastros(){
+		
+		$sql = "SELECT 'plataforma' as 'tabela', 'id_plataforma' as 'campo_id', p.id_plataforma as 'valor_id', 'descricao' as 'campo_des', p.descricao as 'valor_des', 'marca' as 'campo_marca', p.marca as 'valor_marca' FROM plataforma p
+				union
+				SELECT 'estado_avaliacao' as 'tabela', 'id_estado_avaliacao' as 'campo_id', ea.id_estado_avaliacao as 'valor_id', 'descricao' as 'campo_des', ea.descricao as 'valor_des', null as 'campo_marca', null as 'valor_marca' FROM estado_avaliacao ea
+				union
+				SELECT 'estado_jogo' as 'tabela', 'id_estado_jogo' as 'campo_id', ej.id_estado_jogo as 'valor_id', 'descricao' as 'campo_des', ej.descricao as 'valor_des', null as 'campo_marca', null as 'valor_marca' FROM estado_jogo ej
+				union
+				SELECT 'estado_transacao' as 'tabela', 'id_estado_transacao' as 'campo_id', et.id_estado_transacao as 'valor_id', 'descricao' as 'campo_des', et.descricao as 'valor_des', null as 'campo_marca', null as 'valor_marca' FROM estado_transacao et
+				union
+				SELECT 'interesse' as 'tabela', 'id_interesse' as 'campo_id', i.id_interesse as 'valor_id', 'descricao' as 'campo_des', i.descricao as 'valor_des', null as 'campo_marca', null as 'valor_marca' FROM interesse i
+				union
+				SELECT 'metodo_envio' as 'tabela', 'id_metodo_envio' as 'campo_id', me.id_metodo_envio as 'valor_id', 'descricao' as 'campo_des', me.descricao as 'valor_des', null as 'campo_marca', null as 'valor_marca' FROM metodo_envio me
+				union
+				SELECT 'nivel' as 'tabela', 'id_nivel' as 'campo_id', n.id_nivel as 'valor_id', 'descricao' as 'campo_des', n.descricao as 'valor_des', null as 'campo_marca', null as 'valor_marca' FROM nivel n";
+		
+		$stmt = $this->conn->prepare($sql);
+		
+		$stmt->execute();
+        $cadastros = $stmt->get_result();
+        $stmt->close();
+		
+		$response = array();
+		            
+		while ($cad = $cadastros->fetch_assoc()) {
+			array_push($response, $cad);
+		}
+		return $response;
+	}
+	
+	
+	
     /**
      * Validating user api key
      * If the api key is there in db, it is a valid key
