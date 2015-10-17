@@ -62,6 +62,33 @@ class DbHandler {
         return $response;
     }
 
+	public function update($tabela, $id, $obj) {
+		//$ojb[campo] = valor;
+		
+		$prim = true;
+		$campos = array();
+		$where = "id_".$tabela." = '".$id."'";
+		
+		foreach($obj as $campo => $valor){
+			$campos[] = "$campo = '$valor'";
+		}
+		$upd = implode(',',$campos);
+		
+		$sql = "update $tabela
+				   set $upd
+				 where $where";
+		
+		$stmt = $this->conn->prepare($sql);
+		
+		$result = $stmt->execute();
+		$stmt->close();
+		
+		if(!$result){
+			return false;
+		}
+		return true;
+	}
+	
     /**
      * Checking user login
      * @param String $email User login email id

@@ -96,7 +96,31 @@ $app->post('/register', function() use ($app) {
             // echo json response
             echoRespnse(201, $response);
         });
-
+		
+$app->put('/usuario/:id', function($id_usuario) use($app) {
+            global $user_id;
+			
+			$obj = array();
+            
+			if($app->request->put('nome')!==null) 			 $obj['nome'] 			 = $app->request->put('nome');
+			if($app->request->put('gps')!==null) 			 $obj['gps'] 			 = $app->request->put('gps');
+			if($app->request->put('id_metodo_envio')!==null) $obj['id_metodo_envio'] = $app->request->put('id_metodo_envio');
+			if($app->request->put('id_estado_jogo')!==null)  $obj['id_estado_jogo']  = $app->request->put('id_estado_jogo');
+			if($app->request->put('distancia')!==null) 		 $obj['distancia']		 = $app->request->put('distancia');
+				
+            $db = new DbHandler();
+            $response = array();
+			
+            $result = $db->update('usuario', $id_usuario, $obj);
+            if ($result) {
+                $response["error"] = false;
+                $response["message"] = "Usuário atualizado com sucesso!";
+            } else {
+				$response["error"] = true;
+                $response["message"] = "Erro ao atualizar o usuário!";
+            }
+            echoRespnse(200, $response);
+        });
 /**
  * User Login
  * url - /login
