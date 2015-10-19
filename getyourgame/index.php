@@ -10,7 +10,7 @@ $app = new \Slim\Slim();
 
 // User id from db - Global Variable
 $user_id = NULL;
-
+//
 /**
  * Adding Middle Layer to authenticate every request
  * Checking if the request has valid api key in the 'Authorization' header
