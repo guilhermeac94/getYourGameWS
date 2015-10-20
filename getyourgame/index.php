@@ -83,6 +83,10 @@ $app->post('/register', function() use ($app) {
             $res = $db->createUser($name, $email, $password);
 
             if ($res == USER_CREATED_SUCCESSFULLY) {
+				
+				$user = $db->getUserByEmail($email);
+                $response['id_usuario'] = $user['id_usuario'];
+				$response['chave_api'] = $user['chave_api'];
                 $response["error"] = false;
                 $response["message"] = "Usuário registrado com sucesso!";
 				$response["nome"] = $name;
