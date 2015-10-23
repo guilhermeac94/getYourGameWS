@@ -244,6 +244,22 @@ class DbHandler {
 		return $response;
     }
 	
+    public function getTodosUsuarios() {
+        $stmt = $this->conn->prepare("SELECT nome FROM usuario");
+		$stmt->execute();
+        $usuarios = $stmt->get_result();
+        $stmt->close();
+		
+		$response = array();
+		            
+		while ($u = $usuarios->fetch_assoc()) {
+			$usuario = array();
+			$usuario["nome"] = $u["nome"];
+			array_push($response, $usuario);
+		}
+		return $response;
+    }
+	
 	public function getTodosCadastros(){
 		
 		$sql = "SELECT 'plataforma' as 'tabela', 'id_plataforma' as 'campo_id', p.id_plataforma as 'valor_id', 'descricao' as 'campo_des', p.descricao as 'valor_des', 'marca' as 'campo_marca', p.marca as 'valor_marca' FROM plataforma p

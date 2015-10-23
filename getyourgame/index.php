@@ -214,6 +214,18 @@ $app->get('/estado_jogo', function() use ($app) {
 			
 			echoRespnse(200, $response);
 		});
+
+$app->get('/usuarios', function() use ($app) {
+            //global $user_id;
+            $response = array();
+			$db = new DbHandler();
+
+            // fetch task
+            $response = $db->getTodosUsuarios();
+			
+			echoRespnse(200, $response);
+		});		
+		
 		
 $app->get('/cadastros', function() use ($app) {
             //global $user_id;
