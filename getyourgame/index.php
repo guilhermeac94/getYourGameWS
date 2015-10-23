@@ -215,13 +215,16 @@ $app->get('/estado_jogo', function() use ($app) {
 			echoRespnse(200, $response);
 		});
 
-$app->get('/usuarios', function() use ($app) {
+$app->post('/usuarios', function() use ($app) {	
             //global $user_id;
-            $response = array();
+			
+			$filtro = $app->request()->post('filtro');
+						
+			$response = array();
 			$db = new DbHandler();
-
+			
             // fetch task
-            $response = $db->getTodosUsuarios();
+            $response = $db->getTodosUsuarios($filtro);
 			
 			echoRespnse(200, $response);
 		});		

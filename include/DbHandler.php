@@ -244,8 +244,14 @@ class DbHandler {
 		return $response;
     }
 	
-    public function getTodosUsuarios() {
-        $stmt = $this->conn->prepare("SELECT nome FROM usuario");
+    public function getTodosUsuarios($filtro) {
+		
+		$where = '';
+		if($filtro){
+			$where = " where nome like '%$filtro%'";
+		}
+		$sql = "SELECT nome FROM usuario $where";
+        $stmt = $this->conn->prepare($sql);
 		$stmt->execute();
         $usuarios = $stmt->get_result();
         $stmt->close();
@@ -257,6 +263,7 @@ class DbHandler {
 			$usuario["nome"] = $u["nome"];
 			array_push($response, $usuario);
 		}
+		
 		return $response;
     }
 	
