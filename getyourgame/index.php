@@ -227,7 +227,21 @@ $app->post('/usuarios', function() use ($app) {
             $response = $db->getTodosUsuarios($filtro);
 			
 			echoRespnse(200, $response);
-		});		
+		});
+
+$app->post('/jogos', function() use ($app) {	
+			//global $user_id;
+			
+			$filtro = $app->request()->post('filtro');
+						
+			$response = array();
+			$db = new DbHandler();
+			
+			// fetch task
+			$response = $db->getTodosJogos($filtro);
+			
+			echoRespnse(200, $response);
+});		
 		
 		
 $app->get('/cadastros', function() use ($app) {

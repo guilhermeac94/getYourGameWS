@@ -267,6 +267,29 @@ class DbHandler {
 		return $response;
     }
 	
+	public function getTodosJogos($filtro) {
+		
+		$where = '';
+		if($filtro){
+			$where = " where descricao like '%$filtro%'";
+		}
+		$sql = "SELECT descricao FROM jogo $where";
+        $stmt = $this->conn->prepare($sql);
+		$stmt->execute();
+        $jogos = $stmt->get_result();
+        $stmt->close();
+		
+		$response = array();
+		            
+		while ($u = $jogos->fetch_assoc()) {
+			$jogo = array();
+			$jogo["nome"] = $u["descricao"];
+			array_push($response, $jogo);
+		}
+		
+		return $response;
+    }
+	
 	public function getTodosCadastros(){
 		
 		$sql = "SELECT 'plataforma' as 'tabela', 'id_plataforma' as 'campo_id', p.id_plataforma as 'valor_id', 'descricao' as 'campo_des', p.descricao as 'valor_des', 'marca' as 'campo_marca', p.marca as 'valor_marca' FROM plataforma p
