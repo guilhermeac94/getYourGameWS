@@ -65,7 +65,7 @@ $app->get('/teste', function() use ($app) {
 	echoRespnse(201, $response);
 });
  
-$app->post('/register', function() use ($app) {
+$app->post('/cadastro', function() use ($app) {
             // check for required params
             verifyRequiredParams(array('nome', 'email', 'senha'));
 
@@ -172,7 +172,27 @@ $app->post('/login', function() use ($app) {
             echoRespnse(200, $response);
         });
 
-		
+
+$app->get('/usuario_email/:email' , function($email) {
+			//global $user_id;
+			$response = array();
+			$db = new DbHandler();
+			
+			// fetch task
+			$result = $db->getUserByEmail($email);
+
+			if ($result != NULL) {
+				$response["error"] = false;
+				$response['id_usuario'] = $result['id_usuario'];
+				$response['nome'] = $result['nome'];
+				$response['email'] = $result['email'];
+				$response['chave_api'] = $result['chave_api'];
+				echoRespnse(200, $response);
+			} else {
+				$response["error"] = true;
+				echoRespnse(200, $response);
+			}
+		});
 		
 $app->get('/usuario/:id', 'authenticate', function($id_usuario) {
             //global $user_id;

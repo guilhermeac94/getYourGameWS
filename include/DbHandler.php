@@ -39,7 +39,7 @@ class DbHandler {
             $api_key = $this->generateApiKey();
 
             // insert query
-            $stmt = $this->conn->prepare("insert into usuario values ((select ifnull(max(u.id_usuario),0)+1 from usuario u),?,?,?,?,null,null,null,null)");
+            $stmt = $this->conn->prepare("insert into usuario values ((select ifnull(max(u.id_usuario),0)+1 from usuario u),?,?,?,?,null,null,null,null,null)");
             $stmt->bind_param("ssss", $name, $email, $password_hash, $api_key);
 
             $result = $stmt->execute();
@@ -173,7 +173,10 @@ class DbHandler {
     public function getUserByEmail($email) {
         $stmt = $this->conn->prepare("SELECT id_usuario, nome, email, chave_api FROM usuario WHERE email = ?");
         $stmt->bind_param("s", $email);
-        if ($stmt->execute()) {
+		$stmt->execute();
+        $stmt->store_result();
+		$num_rows = $stmt->num_rows;
+        if ($num_rows>0) {
             // $user = $stmt->get_result()->fetch_assoc();
             $stmt->bind_result($id_usuario, $name, $email, $api_key);
             $stmt->fetch();
@@ -250,7 +253,7 @@ class DbHandler {
 		if($filtro){
 			$where = " where nome like '%$filtro%'";
 		}
-		$sql = "SELECT nome FROM usuario $where";
+		$sql = "SELECT nome, foto FROM usuario $where";
         $stmt = $this->conn->prepare($sql);
 		$stmt->execute();
         $usuarios = $stmt->get_result();
@@ -261,6 +264,7 @@ class DbHandler {
 		while ($u = $usuarios->fetch_assoc()) {
 			$usuario = array();
 			$usuario["nome"] = $u["nome"];
+			$usuario["foto"] = base64_encode($u["foto"]);
 			array_push($response, $usuario);
 		}
 		
@@ -273,17 +277,19 @@ class DbHandler {
 		if($filtro){
 			$where = " where descricao like '%$filtro%'";
 		}
-		$sql = "SELECT descricao FROM jogo $where";
+		$sql = "SELECT descricao, foto FROM jogo $where";
         $stmt = $this->conn->prepare($sql);
 		$stmt->execute();
-        $jogos = $stmt->get_result();
+		$jogos = $stmt->get_result();
         $stmt->close();
 		
 		$response = array();
 		            
-		while ($u = $jogos->fetch_assoc()) {
+		while ($j = $jogos->fetch_assoc()) {
+			
 			$jogo = array();
-			$jogo["nome"] = $u["descricao"];
+			$jogo["nome"] = $j["descricao"];
+			$jogo["foto"] = base64_encode($j["foto"]);
 			array_push($response, $jogo);
 		}
 		
