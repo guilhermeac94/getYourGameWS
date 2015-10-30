@@ -61,7 +61,7 @@ function authenticate(\Slim\Route $route) {
 $app->get('/teste', function() use ($app) {
 	$response = array();
 	$response["id"] = 1;
-	$response["content"] = 'Web Service consumido com sucesso!';
+	$response["content"] = 'Web Service consumido com sucesso!!!';
 	echoRespnse(201, $response);
 });
  
