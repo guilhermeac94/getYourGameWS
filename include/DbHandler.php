@@ -70,7 +70,12 @@ class DbHandler {
 		$where = "id_".$tabela." = '".$id."'";
 		
 		foreach($obj as $campo => $valor){
-			$campos[] = "$campo = '$valor'";
+			if($campo == 'foto'){
+				$campos[] = "$campo = FROM_BASE64('$valor')";
+			}else{
+				$campos[] = "$campo = '$valor'";
+			}
+			
 		}
 		$upd = implode(',',$campos);
 		
@@ -148,17 +153,18 @@ class DbHandler {
 	
 	
 	public function getUserById($id_usuario) {
-        $stmt = $this->conn->prepare("SELECT id_usuario, nome, email, chave_api FROM usuario WHERE id_usuario = ?");
+        $stmt = $this->conn->prepare("SELECT id_usuario, nome, email, chave_api, foto FROM usuario WHERE id_usuario = ?");
         $stmt->bind_param("i", $id_usuario);
         if ($stmt->execute()) {
             // $user = $stmt->get_result()->fetch_assoc();
-            $stmt->bind_result($id_usuario, $name, $email, $api_key);
+            $stmt->bind_result($id_usuario, $name, $email, $api_key, $foto);
             $stmt->fetch();
             $user = array();
 			$user["id_usuario"] = $id_usuario;
             $user["nome"] = $name;
             $user["email"] = $email;
             $user["chave_api"] = $api_key;
+            $user["foto"] = $foto;
             $stmt->close();
             return $user;
         } else {

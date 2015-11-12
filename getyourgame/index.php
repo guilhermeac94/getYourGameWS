@@ -111,6 +111,7 @@ $app->put('/usuario/:id', function($id_usuario) use($app) {
 			if($app->request->put('id_metodo_envio')!==null) $obj['id_metodo_envio'] = $app->request->put('id_metodo_envio');
 			if($app->request->put('id_estado_jogo')!==null)  $obj['id_estado_jogo']  = $app->request->put('id_estado_jogo');
 			if($app->request->put('distancia')!==null) 		 $obj['distancia']		 = $app->request->put('distancia');
+			if($app->request->put('foto')!==null) 		     $obj['foto']		     = $app->request->put('foto');
 				
             $db = new DbHandler();
             $response = array();
