@@ -61,6 +61,58 @@ class DbHandler {
 
         return $response;
     }
+	
+	public function insertUsuarioJogo($id_jogo, $id_usuario, $id_interesse, $id_nivel, $distancia, $id_plataforma, $preco, $id_jogo_troca, $preco_inicial, $preco_final) {
+        $response = array();
+				
+		$sql = "insert into usuario_jogo values(
+					(select ifnull(max(uj.id_usuario_jogo),0)+1 from usuario_jogo uj),
+					$id_jogo,
+					$id_usuario,
+					$id_interesse,
+					$id_nivel,
+					$distancia,
+					$id_plataforma,
+					$preco,
+					$id_jogo_troca,
+					$preco_inicial,
+					$preco_final
+				)";
+				
+		// insert query
+		$stmt = $this->conn->prepare($sql);
+		$result = $stmt->execute();
+		$stmt->close();
+
+		// Check for successful insertion
+		return $result;
+    }
+	
+	
+	public function insert($tab, $obj) {
+        $response = array();
+				
+		$campos = array();
+		$valores = array();
+		
+		foreach($obj as $campo => $valor){
+			$campos[] = $campo;
+			$valores[] = $valor == null ? 'null' : "'".$valor."'";
+		}
+		
+		$sql = "insert into $tab
+					(".implode(',',$campos).")
+				values
+					(".implode(',',$valores).")";
+				
+		// insert query
+		$stmt = $this->conn->prepare($sql);
+		$result = $stmt->execute();
+		$stmt->close();
+
+		// Check for successful insertion
+		return $result;
+    }
 
 	public function update($tabela, $id, $obj) {
 		//$ojb[campo] = valor;

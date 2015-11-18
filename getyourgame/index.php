@@ -100,6 +100,51 @@ $app->post('/cadastro', function() use ($app) {
             // echo json response
             echoRespnse(201, $response);
         });
+
+$app->post('/usuario_jogo', function() use ($app) {
+            // check for required params
+            verifyRequiredParams(array());
+
+            $response = array();			
+			/*
+            // reading post params
+			$id_jogo		= ($app->request->post('id_jogo')		? $app->request->post('id_jogo') 		: 'null');
+			$id_usuario		= ($app->request->post('id_usuario')	? $app->request->post('id_usuario') 	: 'null');
+			$id_interesse	= ($app->request->post('id_interesse')	? $app->request->post('id_interesse') 	: 'null');
+			$id_nivel		= ($app->request->post('id_nivel')		? $app->request->post('id_nivel') 		: 'null');
+			$distancia		= ($app->request->post('distancia')		? $app->request->post('distancia') 		: 'null');
+			$id_plataforma	= ($app->request->post('id_plataforma')	? $app->request->post('id_plataforma') 	: 'null');
+			$preco			= ($app->request->post('preco')			? $app->request->post('preco') 			: 'null');
+			$id_jogo_troca	= ($app->request->post('id_jogo_troca')	? $app->request->post('id_jogo_troca') 	: 'null');
+			$preco_inicial	= ($app->request->post('preco_inicial')	? $app->request->post('preco_inicial') 	: 'null');
+			$preco_final	= ($app->request->post('preco_final')	? $app->request->post('preco_final') 	: 'null');
+			*/
+			
+			$obj = array('id_jogo'			=> $app->request->post('id_jogo'),
+						 'id_usuario'		=> $app->request->post('id_usuario'),
+						 'id_interesse'		=> $app->request->post('id_interesse'),
+						 'id_nivel'			=> $app->request->post('id_nivel'),
+						 'distancia'		=> $app->request->post('distancia'),
+						 'id_plataforma'	=> $app->request->post('id_plataforma'),
+						 'preco'			=> $app->request->post('preco'),
+						 'id_jogo_troca'	=> $app->request->post('id_jogo_troca'),
+						 'preco_inicial'	=> $app->request->post('preco_inicial'),
+						 'preco_final'		=> $app->request->post('preco_final'));
+            
+            $db = new DbHandler();
+            //$res = $db->insertUsuarioJogo($id_jogo, $id_usuario, $id_interesse, $id_nivel, $distancia, $id_plataforma, $preco, $id_jogo_troca, $preco_inicial, $preco_final);
+			$res = $db->insert('usuario_jogo', $obj);
+
+            if ($res) {
+                $response["error"] = false;
+                $response["message"] = "Interesse salvo com sucesso!";
+            } else {
+                $response["error"] = true;
+                $response["message"] = "Erro ao salvar interesse!";
+            }
+            // echo json response
+            echoRespnse(201, $response);
+        });
 		
 $app->put('/usuario/:id', function($id_usuario) use($app) {
             global $user_id;
