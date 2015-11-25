@@ -123,6 +123,7 @@ $app->post('/usuario_jogo', function() use ($app) {
 			$obj = array('id_jogo'			=> $app->request->post('id_jogo'),
 						 'id_usuario'		=> $app->request->post('id_usuario'),
 						 'id_interesse'		=> $app->request->post('id_interesse'),
+						 'id_estado_jogo'	=> $app->request->post('id_estado_jogo'),
 						 'id_nivel'			=> $app->request->post('id_nivel'),
 						 'distancia'		=> $app->request->post('distancia'),
 						 'id_plataforma'	=> $app->request->post('id_plataforma'),

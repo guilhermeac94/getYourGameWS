@@ -335,7 +335,7 @@ class DbHandler {
 		if($filtro){
 			$where = " where descricao like '%$filtro%'";
 		}
-		$sql = "SELECT descricao, foto FROM jogo $where";
+		$sql = "SELECT id_jogo, descricao, foto FROM jogo $where";
         $stmt = $this->conn->prepare($sql);
 		$stmt->execute();
 		$jogos = $stmt->get_result();
@@ -346,6 +346,7 @@ class DbHandler {
 		while ($j = $jogos->fetch_assoc()) {
 			
 			$jogo = array();
+			$jogo["id_jogo"] = $j["id_jogo"];
 			$jogo["nome"] = $j["descricao"];
 			$jogo["foto"] = base64_encode($j["foto"]);
 			array_push($response, $jogo);
