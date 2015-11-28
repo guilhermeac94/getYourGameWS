@@ -347,8 +347,28 @@ class DbHandler {
 			
 			$jogo = array();
 			$jogo["id_jogo"] = $j["id_jogo"];
-			$jogo["nome"] = $j["descricao"];
+			$jogo["descricao"] = $j["descricao"];
 			$jogo["foto"] = base64_encode($j["foto"]);
+			$jogo["plataformas"] = array();
+			$i = -1;
+			
+			$sql = "SELECT p.id_plataforma,
+						   p.descricao
+					  FROM jogo_plataforma jp,
+						   plataforma p
+					 WHERE p.id_plataforma = jp.id_plataforma
+					   AND jp.id_jogo = ".$jogo["id_jogo"];
+			$stmt = $this->conn->prepare($sql);
+			$stmt->execute();
+			$plat = $stmt->get_result();
+			$stmt->close();
+			while ($p = $plat->fetch_assoc()) {
+				$i++;
+				$jogo["plataformas"][$i] = array();
+				$jogo["plataformas"][$i]["id_plataforma"] = $p["id_plataforma"];
+				$jogo["plataformas"][$i]["descricao"] = $p["descricao"];
+			}
+			
 			array_push($response, $jogo);
 		}
 		
