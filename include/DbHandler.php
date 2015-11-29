@@ -406,6 +406,130 @@ class DbHandler {
 	}
 	
 	
+	public function getOportunidades($id_usuario) {
+		
+        $sql = "select prioridade,
+						id_interesse,
+						id_usuario_jogo,
+						id_usuario,
+						nome,
+						id_jogo,
+						descricao,
+						foto
+				  from (	(select
+								1 as prioridade,
+								ujs.id_interesse,
+								ujo.id_usuario_jogo,
+								uo.id_usuario,
+								uo.nome,
+								jo.id_jogo,
+								jo.descricao,
+								jo.foto
+							from 
+								usuario_jogo ujs,
+								usuario_jogo ujo,
+								usuario uo,
+								jogo jo
+							where 
+								ujs.id_usuario = ".$id_usuario." and 
+								ujs.id_interesse = 3 and	
+								ujo.id_interesse = 1 and
+								uo.id_usuario = ujo.id_usuario and 
+								jo.id_jogo = ujo.id_jogo and
+								ujs.id_jogo = ujo.id_jogo and
+								ujs.id_plataforma = ujo.id_plataforma and
+								((ujs.id_jogo_troca = ujo.id_jogo_troca and 
+								ujs.id_plataforma_troca = ujo.id_plataforma_troca) or 
+								ujs.id_jogo_troca is null) and
+								(ujs.id_estado_jogo = ujo.id_estado_jogo or ujs.id_estado_jogo is null))
+								
+							UNION
+							
+							(select 
+								2 as prioridade,
+								ujs.id_interesse,
+								ujo.id_usuario_jogo,
+								uo.id_usuario,
+								uo.nome,
+								jo.id_jogo,
+								jo.descricao,
+								jo.foto
+							from 
+								usuario_jogo ujs,
+								usuario_jogo ujo,
+								usuario uo,
+								jogo jo 
+							where 
+								ujs.id_usuario = ".$id_usuario." and 
+								ujs.id_interesse = 1 and
+								ujo.id_interesse = 3 and
+								uo.id_usuario = ujo.id_usuario and 
+								jo.id_jogo = ujo.id_jogo and
+								ujs.id_jogo = ujo.id_jogo and
+								ujs.id_plataforma = ujo.id_plataforma and
+								((ujs.id_jogo_troca = ujo.id_jogo_troca and 
+								ujs.id_plataforma_troca = ujo.id_plataforma_troca) or
+								ujs.id_jogo_troca is null) and
+								(ujs.id_estado_jogo = ujo.id_estado_jogo or ujs.id_estado_jogo is null))
+							
+							UNION
+							
+							(select
+								3 as prioridade,
+								ujs.id_interesse,
+								ujo.id_usuario_jogo,
+								uo.id_usuario,
+								uo.nome,
+								jo.id_jogo,
+								jo.descricao,
+								jo.foto
+							from
+								usuario_jogo ujs,
+								usuario_jogo ujo,
+								usuario uo,
+								jogo jo 
+							where 
+								ujs.id_usuario = ".$id_usuario." and 
+								ujs.id_interesse = 4 and
+								ujo.id_interesse = 2 and
+								uo.id_usuario = ujo.id_usuario and 
+								jo.id_jogo = ujo.id_jogo and
+								ujs.id_jogo = ujo.id_jogo and
+								ujs.id_plataforma = ujo.id_plataforma and
+								ujs.preco_inicial<=ujo.preco and 
+								ujs.preco_final>=ujo.preco and
+							   (ujs.id_estado_jogo = ujo.id_estado_jogo or ujs.id_estado_jogo is null)
+							order by
+								ujo.preco)
+						) as tudo
+				 order by prioridade";
+		
+		$stmt = $this->conn->prepare($sql);
+		$stmt->execute();
+		$oport = $stmt->get_result();
+        $stmt->close();
+		
+		$response = array();
+		$i = -1;
+		            
+		while ($o = $oport->fetch_assoc()) {
+		
+			$op = array();
+			$op["id_interesse"] 	= $o["id_interesse"];
+			$op["id_usuario_jogo"] 	= $o["id_usuario_jogo"];
+			$op["id_usuario"] 		= $o["id_usuario"];
+            $op["nome"] 			= $o["nome"];
+            $op["id_jogo"] 			= $o["id_jogo"];
+			$op["descricao"] 		= $o["descricao"];
+            $op["foto"] 			= base64_encode($o["foto"]);
+						
+			array_push($response, $op);
+        }
+		
+		return $response;
+    }
+	
+	
 	
     /**
      * Validating user api key

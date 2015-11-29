@@ -129,6 +129,7 @@ $app->post('/usuario_jogo', function() use ($app) {
 						 'id_plataforma'	=> $app->request->post('id_plataforma'),
 						 'preco'			=> $app->request->post('preco'),
 						 'id_jogo_troca'	=> $app->request->post('id_jogo_troca'),
+						 'id_plataforma_troca'	=> $app->request->post('id_plataforma_troca'),
 						 'preco_inicial'	=> $app->request->post('preco_inicial'),
 						 'preco_final'		=> $app->request->post('preco_final'));
             
@@ -269,6 +270,17 @@ $app->get('/usuario/:id', 'authenticate', function($id_usuario) {
             }
         });
 		
+$app->get('/oportunidades/:id', function($id_usuario) {
+            //global $user_id;
+            $response = array();
+            $db = new DbHandler();
+
+            // fetch task
+            $response = $db->getOportunidades($id_usuario);
+			echoRespnse(200, $response);
+        });
+
+
 		
 //$app->get('/usuario/:id', 'authenticate', function() {
 $app->get('/estado_jogo', function() use ($app) {
