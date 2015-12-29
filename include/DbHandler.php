@@ -329,6 +329,42 @@ class DbHandler {
 		return $response;
     }
 	
+	public function getJogo($id_jogo) {
+		$sql = "SELECT id_jogo, descricao, foto FROM jogo where id_jogo = $id_jogo";
+        $stmt = $this->conn->prepare($sql);
+		$stmt->execute();
+		$jogos = $stmt->get_result();
+        $stmt->close();
+
+		$j = $jogos->fetch_assoc();
+
+		$jogo = array();
+		$jogo["id_jogo"] = $j["id_jogo"];
+		$jogo["descricao"] = $j["descricao"];
+		$jogo["foto"] = base64_encode($j["foto"]);
+		$jogo["plataformas"] = array();
+
+		$i = -1;
+		
+		$sql = "SELECT p.id_plataforma,
+					   p.descricao
+				  FROM jogo_plataforma jp,
+					   plataforma p
+				 WHERE p.id_plataforma = jp.id_plataforma
+				   AND jp.id_jogo = ".$jogo["id_jogo"];
+		$stmt = $this->conn->prepare($sql);
+		$stmt->execute();
+		$plat = $stmt->get_result();
+		$stmt->close();
+		while ($p = $plat->fetch_assoc()) {
+			$i++;
+			$jogo["plataformas"][$i] = array();
+			$jogo["plataformas"][$i]["id_plataforma"] = $p["id_plataforma"];
+			$jogo["plataformas"][$i]["descricao"] = $p["descricao"];
+		}
+		return $jogo;
+	}
+	
 	public function getTodosJogos($filtro) {
 		
 		$where = '';

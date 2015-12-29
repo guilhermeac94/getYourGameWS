@@ -308,7 +308,7 @@ $app->post('/usuarios', function() use ($app) {
 			echoRespnse(200, $response);
 		});
 
-$app->post('/jogos', function() use ($app) {	
+$app->post('/jogo', function() use ($app) {	
 			//global $user_id;
 			
 			$filtro = $app->request()->post('filtro');
@@ -321,7 +321,16 @@ $app->post('/jogos', function() use ($app) {
 			
 			echoRespnse(200, $response);
 });		
-		
+
+$app->get('/jogo/:id', function($id_jogo) {	
+			$response = array();
+			$db = new DbHandler();
+			
+			// fetch task
+			$response = $db->getJogo($id_jogo);
+			
+			echoRespnse(200, $response);
+});
 		
 $app->get('/cadastros', function() use ($app) {
             //global $user_id;
