@@ -445,32 +445,40 @@ class DbHandler {
 	public function getOportunidades($id_usuario) {
 		
         $sql = "select prioridade,
-						id_interesse,
-						id_usuario_jogo,
-						id_usuario,
-						nome,
-						id_jogo,
-						descricao,
-						foto
+					   id_interesse,
+					   descricao_jogo,
+					   foto_jogo,
+					   id_usuario_jogo,
+					   id_usuario_ofert,
+					   nome_ofert,
+					   id_jogo_ofert,
+					   descricao_jogo_ofert,
+					   foto_jogo_ofert,
+					   preco_jogo_ofert
 				  from (	(select
 								1 as prioridade,
 								ujs.id_interesse,
+								js.descricao as descricao_jogo,
+								js.foto as foto_jogo,
 								ujo.id_usuario_jogo,
-								uo.id_usuario,
-								uo.nome,
-								jo.id_jogo,
-								jo.descricao,
-								jo.foto
+								uo.id_usuario as id_usuario_ofert,
+								uo.nome as nome_ofert,
+								jo.id_jogo as id_jogo_ofert,
+								jo.descricao as descricao_jogo_ofert,
+								jo.foto as foto_jogo_ofert,
+								null as preco_jogo_ofert
 							from 
 								usuario_jogo ujs,
 								usuario_jogo ujo,
 								usuario uo,
-								jogo jo
+								jogo js,
+								jogo jo								
 							where 
 								ujs.id_usuario = ".$id_usuario." and 
 								ujs.id_interesse = 3 and	
 								ujo.id_interesse = 1 and
 								uo.id_usuario = ujo.id_usuario and 
+								js.id_jogo = ujs.id_jogo and
 								jo.id_jogo = ujo.id_jogo and
 								ujs.id_jogo = ujo.id_jogo and
 								ujs.id_plataforma = ujo.id_plataforma and
@@ -484,22 +492,27 @@ class DbHandler {
 							(select 
 								2 as prioridade,
 								ujs.id_interesse,
+								js.descricao as descricao_jogo,
+								js.foto as foto_jogo,
 								ujo.id_usuario_jogo,
-								uo.id_usuario,
-								uo.nome,
-								jo.id_jogo,
-								jo.descricao,
-								jo.foto
+								uo.id_usuario as id_usuario_ofert,
+								uo.nome as nome_ofert,
+								jo.id_jogo as id_jogo_ofert,
+								jo.descricao as descricao_jogo_ofert,
+								jo.foto as foto_jogo_ofert,
+								null as preco_jogo_ofert
 							from 
 								usuario_jogo ujs,
 								usuario_jogo ujo,
 								usuario uo,
+								jogo js,
 								jogo jo 
 							where 
 								ujs.id_usuario = ".$id_usuario." and 
 								ujs.id_interesse = 1 and
 								ujo.id_interesse = 3 and
 								uo.id_usuario = ujo.id_usuario and 
+								js.id_jogo = ujs.id_jogo and
 								jo.id_jogo = ujo.id_jogo and
 								ujs.id_jogo = ujo.id_jogo and
 								ujs.id_plataforma = ujo.id_plataforma and
@@ -513,12 +526,15 @@ class DbHandler {
 							(select
 								3 as prioridade,
 								ujs.id_interesse,
+								null as descricao_jogo,
+								null as foto_jogo,
 								ujo.id_usuario_jogo,
-								uo.id_usuario,
-								uo.nome,
-								jo.id_jogo,
-								jo.descricao,
-								jo.foto
+								uo.id_usuario as id_usuario_ofert,
+								uo.nome as nome_ofert,
+								jo.id_jogo as id_jogo_ofert,
+								jo.descricao as descricao_jogo_ofert,
+								jo.foto as foto_jogo_ofert,
+								ujo.preco as preco_jogo_ofert
 							from
 								usuario_jogo ujs,
 								usuario_jogo ujo,
@@ -551,20 +567,22 @@ class DbHandler {
 		while ($o = $oport->fetch_assoc()) {
 		
 			$op = array();
-			$op["id_interesse"] 	= $o["id_interesse"];
-			$op["id_usuario_jogo"] 	= $o["id_usuario_jogo"];
-			$op["id_usuario"] 		= $o["id_usuario"];
-            $op["nome"] 			= $o["nome"];
-            $op["id_jogo"] 			= $o["id_jogo"];
-			$op["descricao"] 		= $o["descricao"];
-            $op["foto"] 			= base64_encode($o["foto"]);
-						
+			$op["id_interesse"] 		= $o["id_interesse"];
+			$op["descricao_jogo"] 		= $o["descricao_jogo"];
+			$op["foto_jogo"] 			= base64_encode($o["foto_jogo"]);
+			$op["id_usuario_jogo"] 		= $o["id_usuario_jogo"];
+			$op["id_usuario_ofert"] 	= $o["id_usuario_ofert"];
+            $op["nome_ofert"] 			= $o["nome_ofert"];
+            $op["id_jogo_ofert"] 		= $o["id_jogo_ofert"];
+			$op["descricao_jogo_ofert"] = $o["descricao_jogo_ofert"];
+            $op["foto_jogo_ofert"] 		= base64_encode($o["foto_jogo_ofert"]);
+			$op["preco_jogo_ofert"] 	= $o["preco_jogo_ofert"];
+			
 			array_push($response, $op);
         }
 		
 		return $response;
-    }
-	
+    }	
 	
 	
     /**
