@@ -585,6 +585,18 @@ class DbHandler {
     }	
 	
 	
+	public function getTransacaoByUser($id_usuario) {
+        $stmt = $this->conn->prepare("SELECT count(id_transacao) as qtd FROM transacao WHERE id_usuario_jogo_ofertante in (SELECT id_usuario_jogo FROM usuario_jogo WHERE id_usuario = ? ) AND id_estado_transacao=1");
+        $stmt->bind_param("i", $id_usuario);
+        if ($stmt->execute()) {
+            $user = $stmt->get_result()->fetch_assoc();
+            $stmt->close();
+            return ($user["qtd"]>0)?true:false;
+        } else {
+            return NULL;
+        }
+    }
+	
     /**
      * Validating user api key
      * If the api key is there in db, it is a valid key

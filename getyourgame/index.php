@@ -204,6 +204,7 @@ $app->post('/login', function() use ($app) {
 					$response["error"] = false;
 					$response['id_usuario'] = $user['id_usuario'];
 					$response['chave_api'] = $user['chave_api'];
+					$response['tem_transacao'] = $db->getTransacaoByUser($user['id_usuario']);
 					
 					$user_id = $user['id_usuario'];
                 } else {
@@ -235,6 +236,8 @@ $app->get('/usuario_email/:email' , function($email) {
 				$response['nome'] = $result['nome'];
 				$response['email'] = $result['email'];
 				$response['chave_api'] = $result['chave_api'];
+				
+				$response['tem_transacao'] = $db->getTransacaoByUser($result['id_usuario']);
 				echoRespnse(200, $response);
 			} else {
 				$response["error"] = true;
