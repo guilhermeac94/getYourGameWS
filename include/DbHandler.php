@@ -216,7 +216,7 @@ class DbHandler {
             $user["nome"] = $name;
             $user["email"] = $email;
             $user["chave_api"] = $api_key;
-            $user["foto"] = $foto;
+            $user["foto"] = base64_encode($foto);
             $stmt->close();
             return $user;
         } else {

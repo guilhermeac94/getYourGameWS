@@ -265,6 +265,7 @@ $app->get('/usuario/:id', 'authenticate', function($id_usuario) {
 				$response['nome'] = $result['nome'];
 				$response['email'] = $result['email'];
 				$response['chave_api'] = $result['chave_api'];
+				$response['foto'] = $result['foto'];
                 echoRespnse(200, $response);
             } else {
                 $response["error"] = true;
