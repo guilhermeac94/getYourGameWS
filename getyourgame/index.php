@@ -274,6 +274,16 @@ $app->get('/usuario/:id', 'authenticate', function($id_usuario) {
             }
         });
 		
+$app->get('/preferencias/:id', function($id_usuario) {
+            //global $user_id;
+            $response = array();
+            $db = new DbHandler();
+
+            // fetch task
+            $response = $db->getPreferencias($id_usuario);
+			echoRespnse(200, $response);
+        });
+		
 $app->get('/oportunidades/:id', function($id_usuario) {
             //global $user_id;
             $response = array();

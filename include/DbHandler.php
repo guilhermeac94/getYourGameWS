@@ -224,6 +224,30 @@ class DbHandler {
         }
     }
 	
+	public function getPreferencias($id_usuario){
+		$stmt = $this->conn->prepare("select u.gps,
+											 u.distancia,
+											 e.descricao desc_estado_jogo,
+											 m.descricao desc_metodo_envio
+										from usuario u,
+											 estado_jogo e,
+											 metodo_envio m
+									   where u.id_estado_jogo = e.id_estado_jogo
+									     and u.id_metodo_envio = m.id_metodo_envio
+										 and u.id_usuario = $id_usuario");
+		$stmt->execute();
+		$stmt->bind_result($gps, $distancia, $desc_estado_jogo, $desc_metodo_envio);
+        $stmt->fetch();
+		
+		$prefer = array();
+		$prefer["gps"] = $gps;
+		$prefer["distancia"] = $distancia;
+		$prefer["desc_estado_jogo"] = $desc_estado_jogo;
+		$prefer["desc_metodo_envio"] = $desc_metodo_envio;
+		$stmt->close();
+		return $prefer;
+	}
+	
     /**
      * Fetching user by email
      * @param String $email User email id
