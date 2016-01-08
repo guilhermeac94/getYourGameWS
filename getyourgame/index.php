@@ -163,7 +163,10 @@ $app->put('/usuario/:id', function($id_usuario) use($app) {
             $db = new DbHandler();
             $response = array();
 			
-            $result = $db->update('usuario', $id_usuario, $obj);
+			
+			$ids = array('id_usuario' => $id_usuario);
+			
+            $result = $db->update('usuario', $ids, $obj);
             if ($result) {
                 $response["error"] = false;
                 $response["message"] = "Usuário atualizado com sucesso!";
@@ -173,12 +176,119 @@ $app->put('/usuario/:id', function($id_usuario) use($app) {
             }
             echoRespnse(200, $response);
         });
-/**
- * User Login
- * url - /login
- * method - POST
- * params - email, password
- */
+
+		
+$app->get('/endereco/:id', function($id_usuario) use($app) {
+			//global $user_id;
+            $response = array();
+            $db = new DbHandler();
+
+            // fetch task
+            $response = array();
+			
+			$result = $db->getEndereco($id_usuario);
+			
+			if($result){
+				$response = $result;
+				$response["error"] = false;
+				$response["message"] = "";
+			}else{
+				$response["error"] = true;
+				$response["message"] = "Nenhum endereço encontrado!";
+			}
+			
+			echoRespnse(200, $response);
+		});
+		
+$app->get('/contato/:id', function($id_usuario) use($app) {
+			//global $user_id;
+            $response = array();
+            $db = new DbHandler();
+			
+			$result = $db->getContatos($id_usuario);
+            
+			if($result){
+				$response = $result;
+			}else{
+				$response['error'] = true;
+				$response['message'] = 'Nenhum contato encontrado!';
+			}		
+            
+			echoRespnse(200, $response);
+		});
+		
+		
+$app->put('/contato/:id', function($id_usuario) use($app) {
+            global $user_id;
+			
+            $endereco = false;
+			$telefone = false;
+			
+			if( $app->request->put('logradouro') !==null ||
+				$app->request->put('cep')		 !==null ||
+				$app->request->put('bairro')	 !==null ||
+				$app->request->put('cidade')	 !==null ||
+				$app->request->put('uf')		 !==null ||
+				$app->request->put('numero')	 !==null ||
+				$app->request->put('complemento')!==null){
+				
+				verifyRequiredParams(array('logradouro','cep','bairro','cidade','uf','numero'));
+				$endereco = true;
+			}
+			
+			if( $app->request->put('ddd')	   !==null ||
+				$app->request->put('telefone') !==null){
+				
+				verifyRequiredParams(array('ddd','telefone'));
+				$telefone = true;
+			}
+			
+			$db = new DbHandler();
+			$ids = array('id_usuario' => $id_usuario);
+            
+			if($endereco){
+				$obj = array();
+				if($app->request->put('logradouro')	!==null) $obj['logradouro']  = $app->request->put('logradouro');
+				if($app->request->put('cep')		!==null) $obj['cep'] 		 = $app->request->put('cep');
+				if($app->request->put('bairro')		!==null) $obj['bairro'] 	 = $app->request->put('bairro');
+				if($app->request->put('cidade')		!==null) $obj['cidade']  	 = $app->request->put('cidade');
+				if($app->request->put('uf')			!==null) $obj['uf']		  	 = $app->request->put('uf');
+				if($app->request->put('numero')		!==null) $obj['numero']	  	 = $app->request->put('numero');
+				if($app->request->put('complemento')!==null) $obj['complemento'] = $app->request->put('complemento');
+				
+				$result_endereco = $db->insert_update('endereco', $ids, false, $obj);
+			}else{
+				$result_endereco = true;
+			}
+			
+			if($telefone){
+				$obj = array();
+				if($app->request->put('ddd')	 !==null) $obj['ddd']  	   = $app->request->put('ddd');
+				if($app->request->put('telefone')!==null) $obj['telefone'] = $app->request->put('telefone');
+				
+				$result_telefone = $db->insert_update('telefone', $ids, false, $obj);
+			}else{
+				$result_telefone = true;
+			}
+			
+            $response = array();
+			
+			if($endereco || $telefone){
+				$result = $result_endereco && $result_telefone;
+				if ($result) {
+					$response["error"] = false;
+					$response["message"] = "Contato salvo com sucesso!";
+				} else {
+					$response["error"] = true;
+					$response["message"] = "Erro ao salvar o contato!";
+				}
+			}else{
+				$response["error"] = false;
+				$response["message"] = "Nenhum dado gravado!";
+			}
+            echoRespnse(200, $response);
+        });
+
 $app->post('/login', function() use ($app) {
 			global $user_id;
 			

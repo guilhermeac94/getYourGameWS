@@ -88,7 +88,31 @@ class DbHandler {
 		return $result;
     }
 	
-	
+	public function insert_update($tab, $ids, $id_sequence, $obj) {
+		
+		$and = '';
+		foreach($ids as $i => $id){
+			$and .= " and $i = '$id'";
+		}		
+		$stmt = $this->conn->prepare("select 1 from $tab WHERE 1=1 $and");
+		$stmt->execute();
+		$stmt->store_result();
+		$existe = $stmt->num_rows > 0;
+		$stmt->close();
+		
+		if($existe){
+			$result = $this->update($tab, $ids, $obj);
+		}else{
+			if(!$id_sequence){
+				foreach($ids as $i => $id){
+					$obj[$i] = $id;
+				}
+			}
+			$result = $this->insert($tab, $obj);
+		}
+		return $result;
+	}
+		
 	public function insert($tab, $obj) {
         $response = array();
 				
@@ -104,7 +128,7 @@ class DbHandler {
 					(".implode(',',$campos).")
 				values
 					(".implode(',',$valores).")";
-				
+
 		// insert query
 		$stmt = $this->conn->prepare($sql);
 		$result = $stmt->execute();
@@ -114,12 +138,15 @@ class DbHandler {
 		return $result;
     }
 
-	public function update($tabela, $id, $obj) {
-		//$ojb[campo] = valor;
-		
+	public function update($tab, $ids, $obj) {
+				
 		$prim = true;
 		$campos = array();
-		$where = "id_".$tabela." = '".$id."'";
+		
+		$and = '';
+		foreach($ids as $i => $id){
+			$and .= " and $i = '$id'";
+		}
 		
 		foreach($obj as $campo => $valor){
 			if($campo == 'foto'){
@@ -131,19 +158,17 @@ class DbHandler {
 		}
 		$upd = implode(',',$campos);
 		
-		$sql = "update $tabela
+		$sql = "update $tab
 				   set $upd
-				 where $where";
+				 where 1=1
+				  $and";
 		
 		$stmt = $this->conn->prepare($sql);
 		
 		$result = $stmt->execute();
 		$stmt->close();
 		
-		if(!$result){
-			return false;
-		}
-		return true;
+		return $result;
 	}
 	
     /**
@@ -465,6 +490,67 @@ class DbHandler {
 		return $response;
 	}
 	
+	public function getEndereco($id_usuario) {
+		
+		$sql = "select e.* from endereco e where e.id_usuario = $id_usuario";
+				   
+		$stmt = $this->conn->prepare($sql);
+		$stmt->execute();
+		$res = $stmt->get_result();
+        $stmt->close();
+		
+		$response = array();
+		
+		$endereco = $res->fetch_assoc();
+		
+		return $endereco;
+	}
+	
+	public function getContatos($id_usuario) {
+		
+		$sql = "select u.id_usuario,
+					   e.logradouro,
+					   e.cep,
+					   e.bairro,
+					   e.cidade,
+					   e.uf,
+					   e.numero,
+					   e.complemento,
+					   t.ddd,
+					   t.telefone
+				  
+				  from usuario u
+				  
+				  left outer join endereco e on u.id_usuario = e.id_usuario
+				  left outer join telefone t on u.id_usuario = t.id_usuario
+				  
+				 where u.id_usuario = $id_usuario";
+				   
+		$stmt = $this->conn->prepare($sql);
+		$stmt->execute();
+		$res = $stmt->get_result();
+        $stmt->close();
+		
+		$response = array();
+		
+		$contatos = $res->fetch_assoc();
+		
+		if(!$contatos){
+			return false;
+		}
+		
+		if($contatos['logradouro'])  $response['logradouro']  = $contatos['logradouro'];
+		if($contatos['cep']) 		 $response['cep']		  = $contatos['cep'];
+		if($contatos['bairro']) 	 $response['bairro']	  = $contatos['bairro'];
+		if($contatos['cidade']) 	 $response['cidade']	  = $contatos['cidade'];
+		if($contatos['uf']) 		 $response['uf']		  = $contatos['uf'];
+		if($contatos['numero'])		 $response['numero']	  = $contatos['numero'];
+		if($contatos['complemento']) $response['complemento'] = $contatos['complemento'];
+		if($contatos['ddd']) 		 $response['ddd']		  = $contatos['ddd'];
+		if($contatos['telefone']) 	 $response['telefone']	  = $contatos['telefone'];
+		
+		return $response;
+	}
 	
 	public function getOportunidades($id_usuario) {
 		
