@@ -393,6 +393,18 @@ $app->get('/preferencias/:id', function($id_usuario) {
             $response = $db->getPreferencias($id_usuario);
 			echoRespnse(200, $response);
         });
+
+$app->get('/dados_oportunidade/:id', function($ids) {
+	//global $user_id;
+	$response = array();
+	$db = new DbHandler();
+
+	$ids = explode(';',$ids);
+	
+	// fetch task
+	$response = $db->getDadosOportunidade($ids[0],$ids[1]);
+	echoRespnse(200, $response);
+});
 		
 $app->get('/oportunidades/:id', function($id_usuario) {
             //global $user_id;

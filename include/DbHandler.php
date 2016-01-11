@@ -552,37 +552,120 @@ class DbHandler {
 		return $response;
 	}
 	
+	public function getDadosOportunidade($id_usuario_jogo, $id_usuario_jogo_ofert) {
+		
+		$sql = "select ujs.id_interesse as id_interesse,		
+						us.id_usuario,
+						(select mes.descricao from metodo_envio mes where mes.id_metodo_envio = us.id_metodo_envio) as prefer_metodo_envio,
+						us.nome,
+						js.descricao as descricao_jogo,
+						ps.descricao as plataforma_jogo,
+						(select ejs.descricao from estado_jogo ejs where ejs.id_estado_jogo = ujs.id_estado_jogo) as estado_jogo,
+						js.foto as foto_jogo,
+						ujs.id_usuario_jogo,
+						
+						ujo.id_interesse as id_interesse_ofert,
+						uo.id_usuario as id_usuario_ofert,
+						(select meo.descricao from metodo_envio meo where meo.id_metodo_envio = uo.id_metodo_envio) as prefer_metodo_envio_ofert,
+						uo.nome as nome_ofert,
+						jo.id_jogo as id_jogo_ofert,
+						jo.descricao as descricao_jogo_ofert,
+						po.descricao as plataforma_jogo_ofert,
+						(select ejo.descricao from estado_jogo ejo where ejo.id_estado_jogo = ujo.id_estado_jogo) as estado_jogo_ofert,
+						jo.foto as foto_jogo_ofert,
+						ujo.preco as preco_jogo_ofert,
+						ujo.id_usuario_jogo as id_usuario_jogo_ofert
+					from 
+						usuario_jogo ujs,
+						usuario_jogo ujo,
+						usuario us,
+						usuario uo,						
+						jogo js,
+						jogo jo,
+						plataforma ps,
+						plataforma po
+					where 
+						ujs.id_usuario_jogo = ".$id_usuario_jogo." and 
+						ujs.id_usuario = us.id_usuario and
+						ujs.id_jogo = js.id_jogo and
+						ujs.id_plataforma = ps.id_plataforma and
+						ujo.id_usuario_jogo = ".$id_usuario_jogo_ofert." and
+						ujo.id_usuario = uo.id_usuario and 
+						ujo.id_jogo = jo.id_jogo and
+						ujo.id_plataforma = po.id_plataforma";
+						
+		$stmt = $this->conn->prepare($sql);
+		$stmt->execute();
+		$oport = $stmt->get_result();
+        $stmt->close();
+		
+		$o = $oport->fetch_assoc();
+		
+		$op = array();
+		$op["id_interesse"] 				= $o["id_interesse"];
+		$op["id_usuario"] 					= $o["id_usuario"];
+		$op["prefer_metodo_envio"]			= $o["prefer_metodo_envio"];
+		$op["nome"] 						= $o["nome"];
+		$op["descricao_jogo"] 				= $o["descricao_jogo"];
+		$op["plataforma_jogo"] 				= $o["plataforma_jogo"];
+		$op["estado_jogo"] 					= $o["estado_jogo"];
+		//$op["foto_jogo"] 					= base64_encode($o["foto_jogo"]);
+		$op["id_usuario_jogo"] 				= $o["id_usuario_jogo"];
+		$op["id_interesse_ofert"] 			= $o["id_interesse_ofert"];
+		$op["id_usuario_ofert"] 			= $o["id_usuario_ofert"];
+		$op["prefer_metodo_envio_ofert"]	= $o["prefer_metodo_envio_ofert"];
+		$op["nome_ofert"] 					= $o["nome_ofert"];
+		$op["id_jogo_ofert"] 				= $o["id_jogo_ofert"];
+		$op["descricao_jogo_ofert"] 		= $o["descricao_jogo_ofert"];
+		$op["plataforma_jogo_ofert"]		= $o["plataforma_jogo_ofert"];
+		$op["estado_jogo_ofert"]			= $o["estado_jogo_ofert"];
+		//$op["foto_jogo_ofert"] 			= base64_encode($o["foto_jogo_ofert"]);
+		$op["preco_jogo_ofert"] 			= $o["preco_jogo_ofert"];
+		$op["id_usuario_jogo_ofert"]		= $o["id_usuario_jogo_ofert"];
+		
+		return $op;
+	}
+	
+	
 	public function getOportunidades($id_usuario) {
 		
         $sql = "select prioridade,
 					   id_interesse,
 					   descricao_jogo,
+					   plataforma_jogo,
 					   foto_jogo,
 					   id_usuario_jogo,
 					   id_usuario_ofert,
 					   nome_ofert,
 					   id_jogo_ofert,
 					   descricao_jogo_ofert,
+					   plataforma_jogo_ofert,
 					   foto_jogo_ofert,
-					   preco_jogo_ofert
+					   preco_jogo_ofert,
+					   id_usuario_jogo_ofert
 				  from (	(select
 								1 as prioridade,
 								ujs.id_interesse,
 								js.descricao as descricao_jogo,
+								ps.descricao as plataforma_jogo,
 								js.foto as foto_jogo,
-								ujo.id_usuario_jogo,
+								ujs.id_usuario_jogo,
 								uo.id_usuario as id_usuario_ofert,
 								uo.nome as nome_ofert,
 								jo.id_jogo as id_jogo_ofert,
 								jo.descricao as descricao_jogo_ofert,
+								po.descricao as plataforma_jogo_ofert,
 								jo.foto as foto_jogo_ofert,
-								null as preco_jogo_ofert
+								null as preco_jogo_ofert,
+								ujo.id_usuario_jogo as id_usuario_jogo_ofert
 							from 
 								usuario_jogo ujs,
 								usuario_jogo ujo,
 								usuario uo,
 								jogo js,
-								jogo jo								
+								jogo jo,
+								plataforma ps,
+								plataforma po
 							where 
 								ujs.id_usuario = ".$id_usuario." and 
 								ujs.id_interesse = 3 and	
@@ -595,7 +678,9 @@ class DbHandler {
 								((ujs.id_jogo_troca = ujo.id_jogo_troca and 
 								ujs.id_plataforma_troca = ujo.id_plataforma_troca) or 
 								ujs.id_jogo_troca is null) and
-								(ujs.id_estado_jogo = ujo.id_estado_jogo or ujs.id_estado_jogo is null))
+								(ujs.id_estado_jogo = ujo.id_estado_jogo or ujs.id_estado_jogo is null) and
+								ps.id_plataforma = ujs.id_plataforma and
+								po.id_plataforma = ujo.id_plataforma)
 								
 							UNION
 							
@@ -603,20 +688,25 @@ class DbHandler {
 								2 as prioridade,
 								ujs.id_interesse,
 								js.descricao as descricao_jogo,
+								ps.descricao as plataforma_jogo,
 								js.foto as foto_jogo,
-								ujo.id_usuario_jogo,
+								ujs.id_usuario_jogo,
 								uo.id_usuario as id_usuario_ofert,
 								uo.nome as nome_ofert,
 								jo.id_jogo as id_jogo_ofert,
 								jo.descricao as descricao_jogo_ofert,
+								po.descricao as plataforma_jogo_ofert,
 								jo.foto as foto_jogo_ofert,
-								null as preco_jogo_ofert
+								null as preco_jogo_ofert,
+								ujo.id_usuario_jogo as id_usuario_jogo_ofert
 							from 
 								usuario_jogo ujs,
 								usuario_jogo ujo,
 								usuario uo,
 								jogo js,
-								jogo jo 
+								jogo jo,
+								plataforma ps,
+								plataforma po
 							where 
 								ujs.id_usuario = ".$id_usuario." and 
 								ujs.id_interesse = 1 and
@@ -629,7 +719,9 @@ class DbHandler {
 								((ujs.id_jogo_troca = ujo.id_jogo_troca and 
 								ujs.id_plataforma_troca = ujo.id_plataforma_troca) or
 								ujs.id_jogo_troca is null) and
-								(ujs.id_estado_jogo = ujo.id_estado_jogo or ujs.id_estado_jogo is null))
+								(ujs.id_estado_jogo = ujo.id_estado_jogo or ujs.id_estado_jogo is null) and
+								ps.id_plataforma = ujs.id_plataforma and
+								po.id_plataforma = ujo.id_plataforma)
 							
 							UNION
 							
@@ -637,19 +729,23 @@ class DbHandler {
 								3 as prioridade,
 								ujs.id_interesse,
 								null as descricao_jogo,
+								null as plataforma_jogo,
 								null as foto_jogo,
-								ujo.id_usuario_jogo,
+								ujs.id_usuario_jogo,
 								uo.id_usuario as id_usuario_ofert,
 								uo.nome as nome_ofert,
 								jo.id_jogo as id_jogo_ofert,
 								jo.descricao as descricao_jogo_ofert,
+								po.descricao as plataforma_jogo_ofert,
 								jo.foto as foto_jogo_ofert,
-								ujo.preco as preco_jogo_ofert
+								ujo.preco as preco_jogo_ofert,
+								ujo.id_usuario_jogo as id_usuario_jogo_ofert
 							from
 								usuario_jogo ujs,
 								usuario_jogo ujo,
 								usuario uo,
-								jogo jo 
+								jogo jo,
+								plataforma po
 							where 
 								ujs.id_usuario = ".$id_usuario." and 
 								ujs.id_interesse = 4 and
@@ -660,7 +756,8 @@ class DbHandler {
 								ujs.id_plataforma = ujo.id_plataforma and
 								ujs.preco_inicial<=ujo.preco and 
 								ujs.preco_final>=ujo.preco and
-							   (ujs.id_estado_jogo = ujo.id_estado_jogo or ujs.id_estado_jogo is null)
+								(ujs.id_estado_jogo = ujo.id_estado_jogo or ujs.id_estado_jogo is null) and
+							    po.id_plataforma = ujo.id_plataforma
 							order by
 								ujo.preco)
 						) as tudo
@@ -679,15 +776,17 @@ class DbHandler {
 			$op = array();
 			$op["id_interesse"] 		= $o["id_interesse"];
 			$op["descricao_jogo"] 		= $o["descricao_jogo"];
+			$op["plataforma_jogo"] 		= $o["plataforma_jogo"];
 			$op["foto_jogo"] 			= base64_encode($o["foto_jogo"]);
 			$op["id_usuario_jogo"] 		= $o["id_usuario_jogo"];
 			$op["id_usuario_ofert"] 	= $o["id_usuario_ofert"];
             $op["nome_ofert"] 			= $o["nome_ofert"];
             $op["id_jogo_ofert"] 		= $o["id_jogo_ofert"];
 			$op["descricao_jogo_ofert"] = $o["descricao_jogo_ofert"];
+			$op["plataforma_jogo_ofert"]= $o["plataforma_jogo_ofert"];
             $op["foto_jogo_ofert"] 		= base64_encode($o["foto_jogo_ofert"]);
 			$op["preco_jogo_ofert"] 	= $o["preco_jogo_ofert"];
-			
+			$op["id_usuario_jogo_ofert"]= $o["id_usuario_jogo_ofert"];
 			array_push($response, $op);
         }
 		
