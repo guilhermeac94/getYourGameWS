@@ -128,7 +128,7 @@ class DbHandler {
 					(".implode(',',$campos).")
 				values
 					(".implode(',',$valores).")";
-
+		
 		// insert query
 		$stmt = $this->conn->prepare($sql);
 		$result = $stmt->execute();
@@ -552,11 +552,37 @@ class DbHandler {
 		return $response;
 	}
 	
-	public function getDadosOportunidade($id_usuario_jogo, $id_usuario_jogo_ofert) {
+	
+	public function insertTransacao($id_usuario_jogo_solic, $id_usuario_jogo_ofert, $id_metodo_envio_solic){
+		$stmt = $this->conn->prepare("select ifnull(max(pt.id_preferencia_transacao),0)+1 as id_preferencia_transacao from preferencia_transacao pt");
+		$result = $stmt->execute();
+		$res = $stmt->get_result();
+        $stmt->close();
+		$d = $res->fetch_assoc();
 		
-		$sql = "select ujs.id_interesse as id_interesse,		
+		$obj = array('id_preferencia_transacao' => $d['id_preferencia_transacao'],
+					 'id_metodo_envio'			=> $id_metodo_envio_solic,
+					 'novo_preco'				=> '',
+					 'id_novo_jogo'				=> '');
+		
+		$this->insert('preferencia_transacao', $obj);
+		
+		$obj = array('id_usuario_jogo_solicitante'	=> $id_usuario_jogo_solic,
+					 'id_usuario_jogo_ofertante'	=> $id_usuario_jogo_ofert,
+					 'id_estado_transacao'			=> '1',
+					 'id_solicitante_preferencia'	=> $d['id_preferencia_transacao'],
+					 'id_ofertante_preferencia'		=> '');
+		
+		return $this->insert('transacao', $obj);
+	}
+	
+	public function getTransacoes($id_usuario, $status){
+		
+		$sql = "select  t.id_transacao,
+						
+						ujs.id_interesse as id_interesse,		
 						us.id_usuario,
-						(select mes.descricao from metodo_envio mes where mes.id_metodo_envio = us.id_metodo_envio) as prefer_metodo_envio,
+						(select mes.descricao from metodo_envio mes where mes.id_metodo_envio = us.id_metodo_envio) as metodo_envio,
 						us.nome,
 						js.descricao as descricao_jogo,
 						ps.descricao as plataforma_jogo,
@@ -566,7 +592,81 @@ class DbHandler {
 						
 						ujo.id_interesse as id_interesse_ofert,
 						uo.id_usuario as id_usuario_ofert,
-						(select meo.descricao from metodo_envio meo where meo.id_metodo_envio = uo.id_metodo_envio) as prefer_metodo_envio_ofert,
+						(select meo.descricao from metodo_envio meo where meo.id_metodo_envio = uo.id_metodo_envio) as metodo_envio_ofert,
+						uo.nome as nome_ofert,
+						jo.id_jogo as id_jogo_ofert,
+						jo.descricao as descricao_jogo_ofert,
+						po.descricao as plataforma_jogo_ofert,
+						(select ejo.descricao from estado_jogo ejo where ejo.id_estado_jogo = ujo.id_estado_jogo) as estado_jogo_ofert,
+						jo.foto as foto_jogo_ofert,
+						ujo.preco as preco_jogo_ofert,
+						ujo.id_usuario_jogo as id_usuario_jogo_ofert
+					from 
+						usuario_jogo ujs,
+						usuario_jogo ujo,
+						usuario us,
+						usuario uo,						
+						jogo js,
+						jogo jo,
+						plataforma ps,
+						plataforma po,
+						transacao t
+					where 
+						ujs.id_usuario_jogo = t.id_usuario_jogo_solicitante and 
+						ujs.id_usuario = us.id_usuario and
+						ujs.id_jogo = js.id_jogo and
+						ujs.id_plataforma = ps.id_plataforma and
+						ujo.id_usuario_jogo = t.id_usuario_jogo_ofertante and
+						ujo.id_usuario = uo.id_usuario and 
+						ujo.id_jogo = jo.id_jogo and
+						ujo.id_plataforma = po.id_plataforma and 
+						t.id_estado_transacao = ".$status." and
+						(us.id_usuario = ".$id_usuario." or uo.id_usuario = ".$id_usuario.")";
+		
+		$stmt = $this->conn->prepare($sql);
+		$stmt->execute();
+		$trans = $stmt->get_result();
+        $stmt->close();
+		
+		$response = array();
+		
+		while ($t = $trans->fetch_assoc()) {
+			$tr = array();
+			$tr["id_transacao"] 		= $t["id_transacao"];
+			$tr["id_interesse"] 		= $t["id_interesse"];
+			$tr["descricao_jogo"] 		= $t["descricao_jogo"];
+			$tr["plataforma_jogo"] 		= $t["plataforma_jogo"];
+			$tr["foto_jogo"] 			= base64_encode($t["foto_jogo"]);
+			$tr["id_usuario_jogo"] 		= $t["id_usuario_jogo"];
+			$tr["id_usuario_ofert"] 	= $t["id_usuario_ofert"];
+            $tr["nome_ofert"] 			= $t["nome_ofert"];
+            $tr["id_jogo_ofert"] 		= $t["id_jogo_ofert"];
+			$tr["descricao_jogo_ofert"] = $t["descricao_jogo_ofert"];
+			$tr["plataforma_jogo_ofert"]= $t["plataforma_jogo_ofert"];
+            $tr["foto_jogo_ofert"] 		= base64_encode($t["foto_jogo_ofert"]);
+			$tr["preco_jogo_ofert"] 	= $t["preco_jogo_ofert"];
+			$tr["id_usuario_jogo_ofert"]= $t["id_usuario_jogo_ofert"];
+			array_push($response, $tr);
+        }
+		
+		return count($response)>0?$response:null;
+	}
+	
+	public function getDadosOportunidade($id_usuario_jogo, $id_usuario_jogo_ofert) {
+		
+		$sql = "select ujs.id_interesse as id_interesse,		
+						us.id_usuario,
+						(select mes.descricao from metodo_envio mes where mes.id_metodo_envio = us.id_metodo_envio) as metodo_envio,
+						us.nome,
+						js.descricao as descricao_jogo,
+						ps.descricao as plataforma_jogo,
+						(select ejs.descricao from estado_jogo ejs where ejs.id_estado_jogo = ujs.id_estado_jogo) as estado_jogo,
+						js.foto as foto_jogo,
+						ujs.id_usuario_jogo,
+						
+						ujo.id_interesse as id_interesse_ofert,
+						uo.id_usuario as id_usuario_ofert,
+						(select meo.descricao from metodo_envio meo where meo.id_metodo_envio = uo.id_metodo_envio) as metodo_envio_ofert,
 						uo.nome as nome_ofert,
 						jo.id_jogo as id_jogo_ofert,
 						jo.descricao as descricao_jogo_ofert,
@@ -604,7 +704,7 @@ class DbHandler {
 		$op = array();
 		$op["id_interesse"] 				= $o["id_interesse"];
 		$op["id_usuario"] 					= $o["id_usuario"];
-		$op["prefer_metodo_envio"]			= $o["prefer_metodo_envio"];
+		$op["metodo_envio"]					= $o["metodo_envio"];
 		$op["nome"] 						= $o["nome"];
 		$op["descricao_jogo"] 				= $o["descricao_jogo"];
 		$op["plataforma_jogo"] 				= $o["plataforma_jogo"];
@@ -613,7 +713,7 @@ class DbHandler {
 		$op["id_usuario_jogo"] 				= $o["id_usuario_jogo"];
 		$op["id_interesse_ofert"] 			= $o["id_interesse_ofert"];
 		$op["id_usuario_ofert"] 			= $o["id_usuario_ofert"];
-		$op["prefer_metodo_envio_ofert"]	= $o["prefer_metodo_envio_ofert"];
+		$op["metodo_envio_ofert"]			= $o["metodo_envio_ofert"];
 		$op["nome_ofert"] 					= $o["nome_ofert"];
 		$op["id_jogo_ofert"] 				= $o["id_jogo_ofert"];
 		$op["descricao_jogo_ofert"] 		= $o["descricao_jogo_ofert"];
@@ -760,7 +860,8 @@ class DbHandler {
 							    po.id_plataforma = ujo.id_plataforma
 							order by
 								ujo.preco)
-						) as tudo
+						) as info
+					where not exists (select * from transacao t where t.id_usuario_jogo_solicitante = info.id_usuario_jogo or t.id_usuario_jogo_ofertante = info.id_usuario_jogo_ofert)
 				 order by prioridade";
 		
 		$stmt = $this->conn->prepare($sql);

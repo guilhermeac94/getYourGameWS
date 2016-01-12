@@ -394,6 +394,36 @@ $app->get('/preferencias/:id', function($id_usuario) {
 			echoRespnse(200, $response);
         });
 
+
+		
+$app->get('/transacao/:id', function($id_usuario_status) {
+	
+	//global $user_id;
+	$response = array();
+	$db = new DbHandler();
+	
+	$aux = explode(';',$id_usuario_status);
+	$id_usuario = $aux[0];
+	$status = $aux[1];
+	
+	$response = $db->getTransacoes($id_usuario, $status);
+	echoRespnse(200, $response);
+});
+		
+$app->post('/transacao', function() use ($app) {
+	//global $user_id;
+	$response = array();
+	$db = new DbHandler();
+	
+	$id_usuario_jogo_solic = $app->request()->post('id_usuario_jogo_solic');
+	$id_usuario_jogo_ofert = $app->request()->post('id_usuario_jogo_ofert');
+	$id_metodo_envio_solic = $app->request()->post('id_metodo_envio_solic');
+	
+	$response = $db->insertTransacao($id_usuario_jogo_solic, $id_usuario_jogo_ofert, $id_metodo_envio_solic);
+	echoRespnse(200, $response);
+});
+		
+		
 $app->get('/dados_oportunidade/:id', function($ids) {
 	//global $user_id;
 	$response = array();
@@ -401,23 +431,19 @@ $app->get('/dados_oportunidade/:id', function($ids) {
 
 	$ids = explode(';',$ids);
 	
-	// fetch task
 	$response = $db->getDadosOportunidade($ids[0],$ids[1]);
 	echoRespnse(200, $response);
 });
 		
 $app->get('/oportunidades/:id', function($id_usuario) {
-            //global $user_id;
-            $response = array();
-            $db = new DbHandler();
+	//global $user_id;
+	$response = array();
+	$db = new DbHandler();
 
-            // fetch task
-            $response = $db->getOportunidades($id_usuario);
-			echoRespnse(200, $response);
-        });
+	$response = $db->getOportunidades($id_usuario);
+	echoRespnse(200, $response);
+});
 
-
-		
 //$app->get('/usuario/:id', 'authenticate', function() {
 $app->get('/estado_jogo', function() use ($app) {
             //global $user_id;
