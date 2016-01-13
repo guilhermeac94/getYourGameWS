@@ -394,18 +394,71 @@ $app->get('/preferencias/:id', function($id_usuario) {
 			echoRespnse(200, $response);
         });
 
-
-		
-$app->get('/transacao/:id', function($id_usuario_status) {
-	
+$app->get('/dados_transacao/:id', function($id_transacao) {
 	//global $user_id;
 	$response = array();
 	$db = new DbHandler();
 	
-	$aux = explode(';',$id_usuario_status);
-	$id_usuario = $aux[0];
-	$status = $aux[1];
+	$response = $db->getDadosTransacao($id_transacao);
+	echoRespnse(200, $response);
+});
+
+
+$app->put('/transacao/:id', function($id_transacao) use($app) {
+	$obj = array();
 	
+	$tipo = null;
+	
+	if($app->request->put('tipo_atualizacao')!==null){
+		$tipo = $app->request->put('tipo_atualizacao');
+	}
+	
+	if($app->request->put('id_estado_transacao')!==null) 			$obj['id_estado_transacao']			= $app->request->put('id_estado_transacao');
+	if($app->request->put('id_metodo_envio_solicitante')!==null)	$obj['id_metodo_envio_solicitante']	= $app->request->put('id_metodo_envio_solicitante');
+	if($app->request->put('id_metodo_envio_ofertante')!==null)		$obj['id_metodo_envio_ofertante']	= $app->request->put('id_metodo_envio_ofertante');
+	if($app->request->put('envio_solicitante')!==null)  			$obj['envio_solicitante']  			= $app->request->put('envio_solicitante');
+	if($app->request->put('envio_ofertante')!==null) 		 		$obj['envio_ofertante']		 		= $app->request->put('envio_ofertante');
+		
+		
+	$db = new DbHandler();
+	$response = array();
+	
+	$result = $db->update('transacao', array('id_transacao' => $id_transacao), $obj);
+	
+	if ($result) {
+		
+		$response["error"] = false;
+		switch($tipo){
+			case 'iniciar':
+				$response["message"] = "Transação iniciada! Acompanhe seu andamento através da lista de Transações.";
+				break;
+			case 'enviar':
+				$response["message"] = "Produto/pagamento enviado! A Transação será encerrada assim que ambos os usuários enviarem.";
+				break;
+			case 'concluir':
+				$response["message"] = "Transação concluída!";
+				break;
+			case 'cancelar':
+				$response["message"] = "Transação cancelada!";
+				break;			
+			default:
+				$response["message"] = "Transação atualizada com sucesso!";
+		}		
+	} else {
+		$response["error"] = true;
+		$response["message"] = "Erro ao atualizar a transação!";
+	}
+	echoRespnse(200, $response);
+});
+
+
+
+$app->get('/transacao/:id_usuario/:status', function($id_usuario, $status) {
+	
+	//global $user_id;
+	$response = array();
+	$db = new DbHandler();
+		
 	$response = $db->getTransacoes($id_usuario, $status);
 	echoRespnse(200, $response);
 });
@@ -417,21 +470,28 @@ $app->post('/transacao', function() use ($app) {
 	
 	$id_usuario_jogo_solic = $app->request()->post('id_usuario_jogo_solic');
 	$id_usuario_jogo_ofert = $app->request()->post('id_usuario_jogo_ofert');
-	$id_metodo_envio_solic = $app->request()->post('id_metodo_envio_solic');
+	$id_metodo_envio_solicitante = $app->request()->post('id_metodo_envio_solicitante');
 	
-	$response = $db->insertTransacao($id_usuario_jogo_solic, $id_usuario_jogo_ofert, $id_metodo_envio_solic);
+	$obj = array('id_usuario_jogo_solicitante'	=> $id_usuario_jogo_solic,
+				 'id_usuario_jogo_ofertante'	=> $id_usuario_jogo_ofert,
+				 'id_estado_transacao'			=> '1',
+				 'id_metodo_envio_solicitante'	=> $id_metodo_envio_solicitante,
+				 'id_metodo_envio_ofertante'	=> '',
+				 'envio_solicitante'			=> '0',
+				 'envio_ofertante'				=> '0');
+	
+	$response = $db->insert('transacao', $obj);
+	
 	echoRespnse(200, $response);
 });
 		
 		
-$app->get('/dados_oportunidade/:id', function($ids) {
+$app->get('/dados_oportunidade/:id_usuario_jogo_solic/:id_usuario_jogo_ofert', function($id_usuario_jogo_solic, $id_usuario_jogo_ofert) {
 	//global $user_id;
 	$response = array();
 	$db = new DbHandler();
 
-	$ids = explode(';',$ids);
-	
-	$response = $db->getDadosOportunidade($ids[0],$ids[1]);
+	$response = $db->getDadosOportunidade($id_usuario_jogo_solic, $id_usuario_jogo_ofert);
 	echoRespnse(200, $response);
 });
 		
@@ -495,15 +555,13 @@ $app->get('/jogo/:id', function($id_jogo) {
 });
 		
 $app->get('/cadastros', function() use ($app) {
-            //global $user_id;
-            $response = array();
-			$db = new DbHandler();
+	$response = array();
+	$db = new DbHandler();
 
-            // fetch task
-            $response = $db->getTodosCadastros();
-			
-			echoRespnse(200, $response);
-		});		
+	$response = $db->getTodosCadastros();
+	
+	echoRespnse(200, $response);
+});		
 
 		
 		
