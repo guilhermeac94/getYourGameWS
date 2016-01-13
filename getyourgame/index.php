@@ -542,7 +542,17 @@ $app->post('/jogo', function() use ($app) {
 			$response = $db->getTodosJogos($filtro);
 			
 			echoRespnse(200, $response);
-});		
+});	
+
+$app->get('/usuario_tem_jogo/:id', function($id_jogo) {	
+	$response = array();
+	$db = new DbHandler();
+
+	// fetch task
+	$response = $db->getUsuarioTemJogo($id_jogo);
+
+	echoRespnse(200, $response);
+});
 
 $app->get('/jogo/:id', function($id_jogo) {	
 			$response = array();

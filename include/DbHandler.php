@@ -378,8 +378,38 @@ class DbHandler {
 		return $response;
     }
 	
+	
+	public function getUsuarioTemJogo($id_jogo) {
+		
+		$sql = "SELECT u.id_usuario, u.nome, u.foto
+				  FROM usuario u
+				 WHERE exists (select 1
+								 from usuario_jogo uj
+								where uj.id_usuario = u.id_usuario
+								  and uj.id_interesse in (1,2)
+								  and uj.id_jogo = $id_jogo)";
+		
+        $stmt = $this->conn->prepare($sql);
+		$stmt->execute();
+        $usuarios = $stmt->get_result();
+        $stmt->close();
+		
+		$response = array();
+		            
+		while ($u = $usuarios->fetch_assoc()) {
+			$usuario = array();
+			$usuario["id_usuario"] = $u["id_usuario"];
+			$usuario["nome"] = $u["nome"];
+			$usuario["foto"] = base64_encode($u["foto"]);
+			array_push($response, $usuario);
+		}
+		return count($response>0)?$response:null;
+    }
+	
+	
+	
 	public function getJogo($id_jogo) {
-		$sql = "SELECT id_jogo, descricao, foto FROM jogo where id_jogo = $id_jogo";
+		$sql = "SELECT id_jogo, descricao, ano, foto FROM jogo where id_jogo = $id_jogo";
         $stmt = $this->conn->prepare($sql);
 		$stmt->execute();
 		$jogos = $stmt->get_result();
@@ -390,13 +420,15 @@ class DbHandler {
 		$jogo = array();
 		$jogo["id_jogo"] = $j["id_jogo"];
 		$jogo["descricao"] = $j["descricao"];
+		$jogo["ano"] = $j["ano"];
 		$jogo["foto"] = base64_encode($j["foto"]);
 		$jogo["plataformas"] = array();
 
 		$i = -1;
 		
 		$sql = "SELECT p.id_plataforma,
-					   p.descricao
+					   p.descricao,
+					   p.marca
 				  FROM jogo_plataforma jp,
 					   plataforma p
 				 WHERE p.id_plataforma = jp.id_plataforma
@@ -410,6 +442,7 @@ class DbHandler {
 			$jogo["plataformas"][$i] = array();
 			$jogo["plataformas"][$i]["id_plataforma"] = $p["id_plataforma"];
 			$jogo["plataformas"][$i]["descricao"] = $p["descricao"];
+			$jogo["plataformas"][$i]["marca"] = $p["marca"];
 		}
 		return $jogo;
 	}
