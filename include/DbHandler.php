@@ -835,7 +835,10 @@ class DbHandler {
 					   plataforma_jogo_ofert,
 					   foto_jogo_ofert,
 					   preco_jogo_ofert,
-					   id_usuario_jogo_ofert
+					   id_usuario_jogo_ofert,
+					   
+					   ifnull((select 1 from transacao t where (t.id_usuario_jogo_solicitante = info.id_usuario_jogo and t.id_usuario_jogo_ofertante = info.id_usuario_jogo_ofert)),0) as existe_transacao
+					   
 				  from (	(select
 								1 as prioridade,
 								ujs.id_interesse,
@@ -954,7 +957,10 @@ class DbHandler {
 							order by
 								ujo.preco)
 						) as info
-					where not exists (select * from transacao t where t.id_usuario_jogo_solicitante = info.id_usuario_jogo or t.id_usuario_jogo_ofertante = info.id_usuario_jogo_ofert)
+					where not exists (select *
+										from transacao t
+									   where (t.id_usuario_jogo_solicitante = info.id_usuario_jogo and t.id_usuario_jogo_ofertante = info.id_usuario_jogo_ofert)
+									     and t.id_estado_transacao <> 1)
 				 order by prioridade";
 		
 		$stmt = $this->conn->prepare($sql);
@@ -967,6 +973,7 @@ class DbHandler {
 		while ($o = $oport->fetch_assoc()) {
 		
 			$op = array();
+			$op["existe_transacao"] 	= $o["existe_transacao"];
 			$op["id_interesse"] 		= $o["id_interesse"];
 			$op["descricao_jogo"] 		= $o["descricao_jogo"];
 			$op["plataforma_jogo"] 		= $o["plataforma_jogo"];
