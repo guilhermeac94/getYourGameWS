@@ -139,8 +139,7 @@ class DbHandler {
     }
 
 	public function update($tab, $ids, $obj) {
-				
-		$prim = true;
+	
 		$campos = array();
 		
 		$and = '';
@@ -160,6 +159,25 @@ class DbHandler {
 		
 		$sql = "update $tab
 				   set $upd
+				 where 1=1
+				  $and";
+		
+		$stmt = $this->conn->prepare($sql);
+		
+		$result = $stmt->execute();
+		$stmt->close();
+		
+		return $result;
+	}
+	
+	public function delete($tab, $ids) {
+		$and = '';
+		foreach($ids as $i => $id){
+			$and .= " and $i = '$id'";
+		}
+		
+		$sql = "delete
+				  from $tab
 				 where 1=1
 				  $and";
 		
@@ -360,7 +378,7 @@ class DbHandler {
 		if($filtro){
 			$where = " where nome like '%$filtro%'";
 		}
-		$sql = "SELECT nome, foto FROM usuario $where";
+		$sql = "SELECT id_usuario, nome, foto FROM usuario $where";
         $stmt = $this->conn->prepare($sql);
 		$stmt->execute();
         $usuarios = $stmt->get_result();
@@ -370,6 +388,7 @@ class DbHandler {
 		            
 		while ($u = $usuarios->fetch_assoc()) {
 			$usuario = array();
+			$usuario["id_usuario"] = $u["id_usuario"];
 			$usuario["nome"] = $u["nome"];
 			$usuario["foto"] = base64_encode($u["foto"]);
 			array_push($response, $usuario);
@@ -377,6 +396,34 @@ class DbHandler {
 		
 		return $response;
     }
+	
+	public function getJogosDoUsuario($id_usuario) {
+		
+		$sql = "SELECT distinct j.id_jogo, j.descricao, j.foto
+				  FROM jogo j
+				 WHERE exists (select 1
+								 from usuario_jogo uj
+								where uj.id_jogo = j.id_jogo
+								  and uj.id_interesse in (1,2)
+								  and uj.id_usuario = $id_usuario)";
+								  
+        $stmt = $this->conn->prepare($sql);
+		$stmt->execute();
+        $usuarios = $stmt->get_result();
+        $stmt->close();
+		
+		$response = array();
+		            
+		while ($u = $usuarios->fetch_assoc()) {
+			$usuario = array();
+			$usuario["id_jogo"] = $u["id_jogo"];
+			$usuario["descricao"] = $u["descricao"];
+			$usuario["foto"] = base64_encode($u["foto"]);
+			array_push($response, $usuario);
+		}
+		return count($response)>0 ? $response : null;
+    }
+	
 	
 	
 	public function getUsuarioTemJogo($id_jogo) {
@@ -403,7 +450,7 @@ class DbHandler {
 			$usuario["foto"] = base64_encode($u["foto"]);
 			array_push($response, $usuario);
 		}
-		return count($response>0)?$response:null;
+		return count($response)>0 ? $response : null;
     }
 	
 	

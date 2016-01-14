@@ -354,7 +354,7 @@ $app->get('/usuario_email/:email' , function($email) {
 				echoRespnse(200, $response);
 			}
 		});
-		
+
 $app->get('/usuario/:id', 'authenticate', function($id_usuario) {
             //global $user_id;
             $response = array();
@@ -372,6 +372,7 @@ $app->get('/usuario/:id', 'authenticate', function($id_usuario) {
                 $response["createdAt"] = $result["created_at"];
 				*/
 				$response["error"] = false;
+				$response['id_usuario'] = $result['id_usuario'];
 				$response['nome'] = $result['nome'];
 				$response['email'] = $result['email'];
 				$response['chave_api'] = $result['chave_api'];
@@ -451,6 +452,23 @@ $app->put('/transacao/:id', function($id_transacao) use($app) {
 	echoRespnse(200, $response);
 });
 
+
+$app->delete('/transacao/:id_transacao', function($id_transacao) {
+	$response = array();
+	$db = new DbHandler();
+		
+	$result = $db->delete('transacao', array('id_transacao' => $id_transacao));
+	
+	if ($result) {		
+		$response["error"] = false;
+		$response["message"] = "Transação recusada.";
+	}else{
+		$response["error"] = true;
+		$response["message"] = "Erro ao remover a Transação!";
+	}
+	
+	echoRespnse(200, $response);
+});
 
 
 $app->get('/transacao/:id_usuario/:status', function($id_usuario, $status) {
@@ -543,6 +561,16 @@ $app->post('/jogo', function() use ($app) {
 			
 			echoRespnse(200, $response);
 });	
+
+$app->get('/jogos_do_usuario/:id', function($id_usuario) {
+	$response = array();
+	$db = new DbHandler();
+
+	// fetch task
+	$response = $db->getJogosDoUsuario($id_usuario);
+
+	echoRespnse(200, $response);
+});
 
 $app->get('/usuario_tem_jogo/:id', function($id_jogo) {	
 	$response = array();
