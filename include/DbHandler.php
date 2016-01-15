@@ -90,15 +90,19 @@ class DbHandler {
 	
 	public function insert_update($tab, $ids, $id_sequence, $obj) {
 		
-		$and = '';
-		foreach($ids as $i => $id){
-			$and .= " and $i = '$id'";
-		}		
-		$stmt = $this->conn->prepare("select 1 from $tab WHERE 1=1 $and");
-		$stmt->execute();
-		$stmt->store_result();
-		$existe = $stmt->num_rows > 0;
-		$stmt->close();
+		if($ids!=null){
+			$and = '';
+			foreach($ids as $i => $id){
+				$and .= " and $i = '$id'";
+			}		
+			$stmt = $this->conn->prepare("select 1 from $tab WHERE 1=1 $and");
+			$stmt->execute();
+			$stmt->store_result();
+			$existe = $stmt->num_rows > 0;
+			$stmt->close();
+		}else{
+			$existe = false;
+		}
 		
 		if($existe){
 			$result = $this->update($tab, $ids, $obj);
@@ -630,6 +634,65 @@ class DbHandler {
 		
 		return $response;
 	}
+	
+	public function getAvaliacoes($id_usuario){
+		$sql = "select a.*,
+					   u.nome,
+					   u.foto
+				  from avaliacao_transacao a,
+					   usuario u
+				 where a.id_usuario_avaliado = $id_usuario
+				   and a.id_usuario_avaliador = u.id_usuario";
+				   
+		$stmt = $this->conn->prepare($sql);
+		$stmt->execute();
+		$aval = $stmt->get_result();
+        $stmt->close();
+		
+		$response = array();
+		
+		while ($a = $aval->fetch_assoc()) {
+			$av = array();
+			$av["id_avaliacao_transacao"] 	= $a["id_avaliacao_transacao"];
+			$av["id_transacao"] 			= $a["id_transacao"];
+			$av["id_usuario_avaliador"] 	= $a["id_usuario_avaliador"];
+			$av["id_usuario_avaliado"] 		= $a["id_usuario_avaliado"];
+			$av["avaliacao"] 				= $a["avaliacao"];
+			$av["observacao"] 				= $a["observacao"];
+            $av["nome"] 					= $a["nome"];
+            $av["foto"] 					= base64_encode($a["foto"]);
+			array_push($response, $av);
+        }
+		return count($response)>0?$response:null;
+	}
+	
+	public function getDadosAvaliacao($id_transacao, $id_usuario_avaliador){
+		$sql = "select *
+				  from avaliacao_transacao
+				 where id_transacao = $id_transacao
+				   and id_usuario_avaliador = $id_usuario_avaliador";
+		
+		$stmt = $this->conn->prepare($sql);
+		$stmt->execute();
+		$aval = $stmt->get_result();
+        $stmt->close();
+		
+		$a = $aval->fetch_assoc();
+		
+		if($a){
+			$av = array();
+			$av["id_avaliacao_transacao"]	= $a["id_avaliacao_transacao"];
+			$av["id_transacao"] 			= $a["id_transacao"];
+			$av["id_usuario_avaliado"] 		= $a["id_usuario_avaliado"];
+			$av["id_usuario_avaliador"] 	= $a["id_usuario_avaliador"];
+			$av["avaliacao"] 				= $a["avaliacao"];
+			$av["observacao"] 				= $a["observacao"];
+			return $av;
+		}else{
+			return null;
+		}
+	}
+	
 	
 	public function getDadosTransacao($id_transacao){
 		

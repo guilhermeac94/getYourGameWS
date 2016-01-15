@@ -395,6 +395,63 @@ $app->get('/preferencias/:id', function($id_usuario) {
 			echoRespnse(200, $response);
         });
 
+
+$app->get('/avaliacoes_usuario/:id_usuario', function($id_usuario){
+	$response = array();
+	$db = new DbHandler();
+
+	// fetch task
+	$response = $db->getAvaliacoes($id_usuario);
+	echoRespnse(200, $response);
+});
+		
+$app->get('/avaliacao_transacao/:id_transacao/:id_usuario_avaliador', function($id_transacao, $id_usuario_avaliador) {
+	//global $user_id;
+	$response = array();
+	$db = new DbHandler();
+
+	// fetch task
+	$response = $db->getDadosAvaliacao($id_transacao, $id_usuario_avaliador);
+	echoRespnse(200, $response);	
+});
+		
+		
+$app->post('/avaliacao_transacao', function() use($app) {
+	$response = array();
+	$db = new DbHandler();
+	$ids = null;
+	
+	$id_avaliacao_transacao = null;
+	
+	if($app->request->put('id_avaliacao_transacao')!==null){
+		$ids = array('id_avaliacao_transacao' => $app->request->put('id_avaliacao_transacao'));
+	}
+	
+	$id_transacao			= $app->request()->post('id_transacao');
+	$id_usuario_avaliador	= $app->request()->post('id_usuario_avaliador');
+	$id_usuario_avaliado	= $app->request()->post('id_usuario_avaliado');
+	$avaliacao				= $app->request()->post('avaliacao');
+	$observacao				= $app->request()->post('observacao');
+	
+	$obj = array('id_transacao'			=> $id_transacao,
+				 'id_usuario_avaliador'	=> $id_usuario_avaliador,
+				 'id_usuario_avaliado'	=> $id_usuario_avaliado,
+				 'avaliacao'			=> $avaliacao,
+				 'observacao'			=> $observacao);
+		
+	$result = $db->insert_update('avaliacao_transacao', $ids, true, $obj);
+		
+	if($result){
+		$response["error"] = false;
+		$response["message"] = "Avaliação salva com sucesso!";
+	}else{
+		$response["error"] = true;
+		$response["message"] = "Ocorreu um erro ao salvar a avaliação!";
+	}
+	
+	echoRespnse(200, $response);
+});
+		
 $app->get('/dados_transacao/:id', function($id_transacao) {
 	//global $user_id;
 	$response = array();
