@@ -102,51 +102,49 @@ $app->post('/cadastro', function() use ($app) {
         });
 
 $app->post('/usuario_jogo', function() use ($app) {
-            // check for required params
-            verifyRequiredParams(array());
+	
+	verifyRequiredParams(array());
+	$response = array();
+									   
+	$obj = array('id_jogo'				=> $app->request->post('id_jogo'),
+				'id_usuario'			=> $app->request->post('id_usuario'),
+				'id_interesse'			=> $app->request->post('id_interesse'),
+				'id_estado_jogo'		=> $app->request->post('id_estado_jogo'),
+				'id_nivel'				=> $app->request->post('id_nivel'),
+				'distancia'				=> $app->request->post('distancia'),
+				'id_plataforma'			=> $app->request->post('id_plataforma'),
+				'preco'					=> $app->request->post('preco'),
+				'id_jogo_troca'			=> $app->request->post('id_jogo_troca'),
+				'id_plataforma_troca'	=> $app->request->post('id_plataforma_troca'),
+				'preco_inicial'			=> $app->request->post('preco_inicial'),
+				'preco_final'			=> $app->request->post('preco_final'));
+							
+   $db = new DbHandler();
+   
+   $result = $db->checkUserInterest($app->request->post('id_interesse'),
+									$app->request->post('id_usuario'),
+									$app->request->post('id_jogo'),
+									$app->request->post('id_plataforma'));
+   
+   if(!$result){
 
-            $response = array();			
-			/*
-            // reading post params
-			$id_jogo		= ($app->request->post('id_jogo')		? $app->request->post('id_jogo') 		: 'null');
-			$id_usuario		= ($app->request->post('id_usuario')	? $app->request->post('id_usuario') 	: 'null');
-			$id_interesse	= ($app->request->post('id_interesse')	? $app->request->post('id_interesse') 	: 'null');
-			$id_nivel		= ($app->request->post('id_nivel')		? $app->request->post('id_nivel') 		: 'null');
-			$distancia		= ($app->request->post('distancia')		? $app->request->post('distancia') 		: 'null');
-			$id_plataforma	= ($app->request->post('id_plataforma')	? $app->request->post('id_plataforma') 	: 'null');
-			$preco			= ($app->request->post('preco')			? $app->request->post('preco') 			: 'null');
-			$id_jogo_troca	= ($app->request->post('id_jogo_troca')	? $app->request->post('id_jogo_troca') 	: 'null');
-			$preco_inicial	= ($app->request->post('preco_inicial')	? $app->request->post('preco_inicial') 	: 'null');
-			$preco_final	= ($app->request->post('preco_final')	? $app->request->post('preco_final') 	: 'null');
-			*/
-			
-			$obj = array('id_jogo'			=> $app->request->post('id_jogo'),
-						 'id_usuario'		=> $app->request->post('id_usuario'),
-						 'id_interesse'		=> $app->request->post('id_interesse'),
-						 'id_estado_jogo'	=> $app->request->post('id_estado_jogo'),
-						 'id_nivel'			=> $app->request->post('id_nivel'),
-						 'distancia'		=> $app->request->post('distancia'),
-						 'id_plataforma'	=> $app->request->post('id_plataforma'),
-						 'preco'			=> $app->request->post('preco'),
-						 'id_jogo_troca'	=> $app->request->post('id_jogo_troca'),
-						 'id_plataforma_troca'	=> $app->request->post('id_plataforma_troca'),
-						 'preco_inicial'	=> $app->request->post('preco_inicial'),
-						 'preco_final'		=> $app->request->post('preco_final'));
-            
-            $db = new DbHandler();
-            //$res = $db->insertUsuarioJogo($id_jogo, $id_usuario, $id_interesse, $id_nivel, $distancia, $id_plataforma, $preco, $id_jogo_troca, $preco_inicial, $preco_final);
-			$res = $db->insert('usuario_jogo', $obj);
+	   //$res = $db->insertUsuarioJogo($id_jogo, $id_usuario, $id_interesse, $id_nivel, $distancia, $id_plataforma, $preco, $id_jogo_troca, $preco_inicial, $preco_final);
+	   $res = $db->insert('usuario_jogo', $obj);
 
-            if ($res) {
-                $response["error"] = false;
-                $response["message"] = "Interesse salvo com sucesso!";
-            } else {
-                $response["error"] = true;
-                $response["message"] = "Erro ao salvar interesse!";
-            }
-            // echo json response
-            echoRespnse(201, $response);
-        });
+	   if ($res) {
+			   $response["error"] = false;
+			   $response["message"] = "Interesse salvo com sucesso!";
+	   } else {
+			   $response["error"] = true;
+			   $response["message"] = "Erro ao salvar interesse!";
+	   }
+   }else{
+	   $response["error"] = true;
+	   $response["message"] = "Usuário já possui interesse conflitante!";
+   }
+
+	echoRespnse(201, $response);
+});
 		
 $app->put('/usuario/:id', function($id_usuario) use($app) {
             global $user_id;
@@ -179,26 +177,34 @@ $app->put('/usuario/:id', function($id_usuario) use($app) {
 
 		
 $app->get('/endereco/:id', function($id_usuario) use($app) {
-			//global $user_id;
-            $response = array();
-            $db = new DbHandler();
+	
+	$response = array();
+	$db = new DbHandler();
 
-            // fetch task
-            $response = array();
-			
-			$result = $db->getEndereco($id_usuario);
-			
-			if($result){
-				$response = $result;
-				$response["error"] = false;
-				$response["message"] = "";
-			}else{
-				$response["error"] = true;
-				$response["message"] = "Nenhum endereço encontrado!";
-			}
-			
-			echoRespnse(200, $response);
-		});
+	$response = array();
+	$aux = array();
+   
+	$result = $db->getEndereco($id_usuario);
+   
+	if($result){
+		$aux = $result;
+		$response["id_usuario"]  = $result["id_usuario"];
+		$response["logradouro"]  = $result["logradouro"];
+		$response["cep"]         = $result["cep"];
+		$response["bairro"]      = $result["bairro"];
+		$response["cidade"]      = $result["cidade"];
+		$response["uf"]          = $result["uf"];
+		$response["numero"]      = $result["numero"];
+		$response["complemento"] = $result["complemento"];
+		$response["error"] 		 = false;
+		$response["message"] 	 = "";
+   }else{
+		$response["error"] = true;
+		$response["message"] = "Nenhum endereço encontrado!";
+   }
+			   
+	echoRespnse(200, $response);
+});
 		
 $app->get('/contato/:id', function($id_usuario) use($app) {
 			//global $user_id;
@@ -407,11 +413,23 @@ $app->get('/avaliacoes_usuario/:id_usuario', function($id_usuario){
 		
 $app->get('/avaliacao_transacao/:id_transacao/:id_usuario_avaliador', function($id_transacao, $id_usuario_avaliador) {
 	//global $user_id;
-	$response = array();
 	$db = new DbHandler();
 
 	// fetch task
-	$response = $db->getDadosAvaliacao($id_transacao, $id_usuario_avaliador);
+	$a = $db->getDadosAvaliacao($id_transacao, $id_usuario_avaliador);
+	
+	if($a){
+		$response = array();
+		$response["id_avaliacao_transacao"]	= $a["id_avaliacao_transacao"];
+		$response["id_transacao"] 			= $a["id_transacao"];
+		$response["id_usuario_avaliado"] 	= $a["id_usuario_avaliado"];
+		$response["id_usuario_avaliador"] 	= $a["id_usuario_avaliador"];
+		$response["avaliacao"] 				= $a["avaliacao"];
+		$response["observacao"] 			= $a["observacao"];
+	}else{
+		$response = null;
+	}
+		
 	echoRespnse(200, $response);	
 });
 		
@@ -608,13 +626,24 @@ $app->post('/usuarios', function() use ($app) {
 $app->post('/jogo', function() use ($app) {	
 			//global $user_id;
 			
-			$filtro = $app->request()->post('filtro');
+			$filtro = null;
+			$interesse = null;
+			$id_usuario = null;
+			
+			if($app->request()->post('filtro')){
+				$filtro = $app->request()->post('filtro');
+			}
+			
+			if($app->request()->post('interesse')){
+				$interesse = $app->request()->post('interesse');
+				$id_usuario = $app->request()->post('id_usuario');
+			}
 						
 			$response = array();
 			$db = new DbHandler();
 			
 			// fetch task
-			$response = $db->getTodosJogos($filtro);
+			$response = $db->getTodosJogos($filtro,$interesse,$id_usuario);
 			
 			echoRespnse(200, $response);
 });	

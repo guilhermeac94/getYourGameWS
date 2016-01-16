@@ -62,6 +62,36 @@ class DbHandler {
         return $response;
     }
 	
+	public function checkUserInterest($id_interesse, $id_usuario, $id_jogo, $id_plataforma) {
+		$response = array();
+                               
+		if($id_interesse==1){
+            $aux = "1,3,4";
+		}elseif($id_interesse==2){
+			$aux = "2,3,4";
+		}elseif($id_interesse==3){
+			$aux = "1,3,2";
+		}elseif($id_interesse==4){
+			$aux = "1,2,4";
+		}
+		
+		$sql = "select id_usuario_jogo
+				  from usuario_jogo
+				 where id_usuario = ".$id_usuario." and 
+					   id_jogo = ".$id_jogo." and
+					   id_plataforma = ".$id_plataforma." and
+					   id_interesse in (".$aux.")";
+               
+	   // insert query
+		$stmt = $this->conn->prepare($sql);
+		$stmt->execute();
+		$stmt->store_result();
+		$result = $stmt->num_rows>0;
+		$stmt->close();
+		return $result;
+   }
+	
+	
 	public function insertUsuarioJogo($id_jogo, $id_usuario, $id_interesse, $id_nivel, $distancia, $id_plataforma, $preco, $id_jogo_troca, $preco_inicial, $preco_final) {
         $response = array();
 				
@@ -498,13 +528,23 @@ class DbHandler {
 		return $jogo;
 	}
 	
-	public function getTodosJogos($filtro) {
+	public function getTodosJogos($filtro,$interesse,$id_usuario){
 		
-		$where = '';
+		$and = '';
+		
 		if($filtro){
-			$where = " where descricao like '%$filtro%'";
+			$and .= " and descricao like '%$filtro%'";
 		}
-		$sql = "SELECT id_jogo, descricao, foto FROM jogo $where";
+		if($interesse){
+			if($interesse==1){
+				$and .= " and not exists (select 1 from usuario_jogo uj where uj.id_interesse in (1,2) and uj.id_usuario = $id_usuario and uj.id_jogo = j.id_jogo)";
+			}elseif($interesse==3){
+				$and .= " and exists (select 1 from usuario_jogo uj where uj.id_interesse in (1,2) and uj.id_usuario = $id_usuario and uj.id_jogo = j.id_jogo)";
+			}
+		}
+		
+		$sql = "SELECT j.id_jogo, j.descricao, j.foto FROM jogo j where 1=1 $and";
+				
         $stmt = $this->conn->prepare($sql);
 		$stmt->execute();
 		$jogos = $stmt->get_result();
@@ -548,8 +588,6 @@ class DbHandler {
 		
 		$sql = "SELECT 'plataforma' as 'tabela', 'id_plataforma' as 'campo_id', p.id_plataforma as 'valor_id', 'descricao' as 'campo_des', p.descricao as 'valor_des', 'marca' as 'campo_marca', p.marca as 'valor_marca' FROM plataforma p
 				union
-				SELECT 'estado_avaliacao' as 'tabela', 'id_estado_avaliacao' as 'campo_id', ea.id_estado_avaliacao as 'valor_id', 'descricao' as 'campo_des', ea.descricao as 'valor_des', null as 'campo_marca', null as 'valor_marca' FROM estado_avaliacao ea
-				union
 				SELECT 'estado_jogo' as 'tabela', 'id_estado_jogo' as 'campo_id', ej.id_estado_jogo as 'valor_id', 'descricao' as 'campo_des', ej.descricao as 'valor_des', null as 'campo_marca', null as 'valor_marca' FROM estado_jogo ej
 				union
 				SELECT 'estado_transacao' as 'tabela', 'id_estado_transacao' as 'campo_id', et.id_estado_transacao as 'valor_id', 'descricao' as 'campo_des', et.descricao as 'valor_des', null as 'campo_marca', null as 'valor_marca' FROM estado_transacao et
@@ -581,8 +619,6 @@ class DbHandler {
 		$stmt->execute();
 		$res = $stmt->get_result();
         $stmt->close();
-		
-		$response = array();
 		
 		$endereco = $res->fetch_assoc();
 		
@@ -677,20 +713,7 @@ class DbHandler {
 		$aval = $stmt->get_result();
         $stmt->close();
 		
-		$a = $aval->fetch_assoc();
-		
-		if($a){
-			$av = array();
-			$av["id_avaliacao_transacao"]	= $a["id_avaliacao_transacao"];
-			$av["id_transacao"] 			= $a["id_transacao"];
-			$av["id_usuario_avaliado"] 		= $a["id_usuario_avaliado"];
-			$av["id_usuario_avaliador"] 	= $a["id_usuario_avaliador"];
-			$av["avaliacao"] 				= $a["avaliacao"];
-			$av["observacao"] 				= $a["observacao"];
-			return $av;
-		}else{
-			return null;
-		}
+		return $aval->fetch_assoc();
 	}
 	
 	
@@ -1110,7 +1133,7 @@ class DbHandler {
         if ($stmt->execute()) {
             $user = $stmt->get_result()->fetch_assoc();
             $stmt->close();
-            return ($user["qtd"]>0)?true:false;
+            return $user["qtd"]>0;
         } else {
             return NULL;
         }
