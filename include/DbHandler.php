@@ -91,33 +91,6 @@ class DbHandler {
 		return $result;
    }
 	
-	
-	public function insertUsuarioJogo($id_jogo, $id_usuario, $id_interesse, $id_nivel, $distancia, $id_plataforma, $preco, $id_jogo_troca, $preco_inicial, $preco_final) {
-        $response = array();
-				
-		$sql = "insert into usuario_jogo values(
-					(select ifnull(max(uj.id_usuario_jogo),0)+1 from usuario_jogo uj),
-					$id_jogo,
-					$id_usuario,
-					$id_interesse,
-					$id_nivel,
-					$distancia,
-					$id_plataforma,
-					$preco,
-					$id_jogo_troca,
-					$preco_inicial,
-					$preco_final
-				)";
-				
-		// insert query
-		$stmt = $this->conn->prepare($sql);
-		$result = $stmt->execute();
-		$stmt->close();
-
-		// Check for successful insertion
-		return $result;
-    }
-	
 	public function insert_update($tab, $ids, $id_sequence, $obj) {
 		
 		if($ids!=null){
@@ -302,8 +275,7 @@ class DbHandler {
     }
 	
 	public function getPreferencias($id_usuario){
-		$stmt = $this->conn->prepare("select u.gps,
-											 u.distancia,
+		$stmt = $this->conn->prepare("select 
 											 e.descricao desc_estado_jogo,
 											 m.descricao desc_metodo_envio
 										from usuario u,
@@ -313,12 +285,10 @@ class DbHandler {
 									     and u.id_metodo_envio = m.id_metodo_envio
 										 and u.id_usuario = $id_usuario");
 		$stmt->execute();
-		$stmt->bind_result($gps, $distancia, $desc_estado_jogo, $desc_metodo_envio);
+		$stmt->bind_result($desc_estado_jogo, $desc_metodo_envio);
         $stmt->fetch();
 		
 		$prefer = array();
-		$prefer["gps"] = $gps;
-		$prefer["distancia"] = $distancia;
 		$prefer["desc_estado_jogo"] = $desc_estado_jogo;
 		$prefer["desc_metodo_envio"] = $desc_metodo_envio;
 		$stmt->close();
@@ -586,17 +556,11 @@ class DbHandler {
 	
 	public function getTodosCadastros(){
 		
-		$sql = "SELECT 'plataforma' as 'tabela', 'id_plataforma' as 'campo_id', p.id_plataforma as 'valor_id', 'descricao' as 'campo_des', p.descricao as 'valor_des', 'marca' as 'campo_marca', p.marca as 'valor_marca' FROM plataforma p
+		$sql = "SELECT 'estado_jogo' as 'tabela', 'id_estado_jogo' as 'campo_id', ej.id_estado_jogo as 'valor_id', 'descricao' as 'campo_des', ej.descricao as 'valor_des' FROM estado_jogo ej
 				union
-				SELECT 'estado_jogo' as 'tabela', 'id_estado_jogo' as 'campo_id', ej.id_estado_jogo as 'valor_id', 'descricao' as 'campo_des', ej.descricao as 'valor_des', null as 'campo_marca', null as 'valor_marca' FROM estado_jogo ej
+				SELECT 'estado_transacao' as 'tabela', 'id_estado_transacao' as 'campo_id', et.id_estado_transacao as 'valor_id', 'descricao' as 'campo_des', et.descricao as 'valor_des' FROM estado_transacao et
 				union
-				SELECT 'estado_transacao' as 'tabela', 'id_estado_transacao' as 'campo_id', et.id_estado_transacao as 'valor_id', 'descricao' as 'campo_des', et.descricao as 'valor_des', null as 'campo_marca', null as 'valor_marca' FROM estado_transacao et
-				union
-				SELECT 'interesse' as 'tabela', 'id_interesse' as 'campo_id', i.id_interesse as 'valor_id', 'descricao' as 'campo_des', i.descricao as 'valor_des', null as 'campo_marca', null as 'valor_marca' FROM interesse i
-				union
-				SELECT 'metodo_envio' as 'tabela', 'id_metodo_envio' as 'campo_id', me.id_metodo_envio as 'valor_id', 'descricao' as 'campo_des', me.descricao as 'valor_des', null as 'campo_marca', null as 'valor_marca' FROM metodo_envio me
-				union
-				SELECT 'nivel' as 'tabela', 'id_nivel' as 'campo_id', n.id_nivel as 'valor_id', 'descricao' as 'campo_des', n.descricao as 'valor_des', null as 'campo_marca', null as 'valor_marca' FROM nivel n";
+				SELECT 'metodo_envio' as 'tabela', 'id_metodo_envio' as 'campo_id', me.id_metodo_envio as 'valor_id', 'descricao' as 'campo_des', me.descricao as 'valor_des' FROM metodo_envio me";
 				
 		$stmt = $this->conn->prepare($sql);
 		$stmt->execute();
