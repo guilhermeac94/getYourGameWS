@@ -589,6 +589,51 @@ class DbHandler {
 		return $endereco;
 	}
 	
+	
+	public function getContatoTransacao($id_usuario){
+		$sql = "select u.id_usuario,
+					   u.nome,
+					   u.email,
+					   u.foto,
+					   e.*,
+					   t.*
+				  from usuario u
+				  left outer join endereco e on u.id_usuario = e.id_usuario
+				  left outer join telefone t on u.id_usuario = t.id_usuario
+				 where u.id_usuario = $id_usuario";
+		
+		$stmt = $this->conn->prepare($sql);
+		$stmt->execute();
+		$res = $stmt->get_result();
+        $stmt->close();
+				
+		$contato = $res->fetch_assoc();
+				
+		if(!$contato){
+			return false;
+		}
+		
+		$response = array();
+		
+		$response['id_usuario']	= $contato['id_usuario'];
+		$response['nome']		= $contato['nome'];
+		$response['email']		= $contato['email'];
+		$response['foto']		= base64_encode($contato['foto']);
+		
+		$response['logradouro']	= $contato['logradouro'];
+		$response['cep']		= $contato['cep'];
+		$response['bairro']		= $contato['bairro'];
+		$response['cidade']		= $contato['cidade'];
+		$response['uf']			= $contato['uf'];
+		$response['numero']		= $contato['numero'];
+		$response['complemento']= $contato['complemento'];
+		$response['ddd']		= $contato['ddd'];
+		$response['telefone']	= $contato['telefone'];
+		
+		return $response;
+	}
+	
+	
 	public function getContatos($id_usuario) {
 		
 		$sql = "select u.id_usuario,

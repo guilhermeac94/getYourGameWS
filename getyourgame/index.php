@@ -200,23 +200,41 @@ $app->get('/endereco/:id', function($id_usuario) use($app) {
 			   
 	echoRespnse(200, $response);
 });
-		
+
+
+$app->get('/contato_transacao/:id', function($id_usuario) use($app) {
+	
+	$response = array();
+	$db = new DbHandler();
+	
+	$result = $db->getContatoTransacao($id_usuario);
+	
+	if($result){
+		$response = $result;		
+	}else{
+		$response = null;
+	}		
+	
+	echoRespnse(200, $response);
+});
+
+
 $app->get('/contato/:id', function($id_usuario) use($app) {
-			//global $user_id;
-            $response = array();
-            $db = new DbHandler();
-			
-			$result = $db->getContatos($id_usuario);
-            
-			if($result){
-				$response = $result;
-			}else{
-				$response['error'] = true;
-				$response['message'] = 'Nenhum contato encontrado!';
-			}		
-            
-			echoRespnse(200, $response);
-		});
+	//global $user_id;
+	$response = array();
+	$db = new DbHandler();
+	
+	$result = $db->getContatos($id_usuario);
+	
+	if($result){
+		$response = $result;
+	}else{
+		$response['error'] = true;
+		$response['message'] = 'Nenhum contato encontrado!';
+	}		
+	
+	echoRespnse(200, $response);
+});
 		
 		
 $app->put('/contato/:id', function($id_usuario) use($app) {
