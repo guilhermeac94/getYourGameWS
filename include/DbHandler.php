@@ -887,6 +887,49 @@ class DbHandler {
 		return count($response)>0?$response:null;
 	}
 	
+	public function getInteresses($id_usuario, $id_interesse){
+		
+		$sql = "select  uj.id_usuario_jogo,
+						uj.id_interesse,		
+						u.id_usuario,
+						u.nome,
+						j.descricao as descricao_jogo,
+						p.descricao as plataforma_jogo,
+						j.foto as foto_jogo,
+						jt.descricao as descricao_jogo_troca,
+						pt.descricao as plataforma_jogo_troca,
+						jt.foto as foto_jogo_troca,
+						uj.preco,
+						uj.preco_inicial,
+						uj.preco_final
+				   
+				   from usuario_jogo uj
+						inner join usuario u on uj.id_usuario = u.id_usuario
+						inner join jogo j on uj.id_jogo = j.id_jogo
+						inner join plataforma p on uj.id_plataforma = p.id_plataforma 
+						left outer join jogo jt on uj.id_jogo_troca = jt.id_jogo
+						left outer join plataforma pt on uj.id_plataforma_troca = pt.id_plataforma
+				  
+				  where uj.id_interesse = ".$id_interesse." and
+						u.id_usuario = ".$id_usuario."";
+		
+		$stmt = $this->conn->prepare($sql);
+		$stmt->execute();
+		$trans = $stmt->get_result();
+        $stmt->close();
+		
+		$response = array();
+		
+		while ($t = $trans->fetch_assoc()) {
+			$t["foto_jogo"] = base64_encode($t["foto_jogo"]);
+			$t["foto_jogo_troca"] = base64_encode($t["foto_jogo_troca"]);
+			array_push($response, $t);
+        }
+		
+		return count($response)>0?$response:null;
+	}
+	
+	
 	public function getDadosOportunidade($id_usuario_jogo_solic, $id_usuario_jogo_ofert) {
 		
 		$sql = "select ujs.id_interesse as id_interesse,		

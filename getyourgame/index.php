@@ -592,6 +592,16 @@ $app->post('/transacao', function() use ($app) {
 });
 		
 		
+$app->get('/interesse/:id_usuario/:id_interesse', function($id_usuario, $id_interesse) {
+	
+	//global $user_id;
+	$response = array();
+	$db = new DbHandler();
+		
+	$response = $db->getInteresses($id_usuario, $id_interesse);
+	echoRespnse(200, $response);
+});
+		
 $app->get('/dados_oportunidade/:id_usuario_jogo_solic/:id_usuario_jogo_ofert', function($id_usuario_jogo_solic, $id_usuario_jogo_ofert) {
 	//global $user_id;
 	$response = array();
