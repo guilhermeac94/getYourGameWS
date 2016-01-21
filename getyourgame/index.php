@@ -115,7 +115,8 @@ $app->post('/usuario_jogo', function() use ($app) {
 				'id_jogo_troca'			=> $app->request->post('id_jogo_troca'),
 				'id_plataforma_troca'	=> $app->request->post('id_plataforma_troca'),
 				'preco_inicial'			=> $app->request->post('preco_inicial'),
-				'preco_final'			=> $app->request->post('preco_final'));
+				'preco_final'			=> $app->request->post('preco_final'),
+				'ativo'					=> 1);
 							
    $db = new DbHandler();
    
@@ -545,7 +546,7 @@ $app->delete('/transacao/:id_transacao', function($id_transacao) {
 	$response = array();
 	$db = new DbHandler();
 		
-	$result = $db->delete('transacao', array('id_transacao' => $id_transacao));
+	$result = $db->delete('transacao', array('id_transacao' => $id_transacao), false);
 	
 	if ($result) {		
 		$response["error"] = false;
@@ -601,7 +602,7 @@ $app->delete('/interesse/:id_usuario_jogo', function($id_usuario_jogo) {
 		$response["message"] = "O interesse não pode ser excluído pois possui transações em curso!";
 	}else{
 				
-		$result = $db->delete('usuario_jogo', array('id_usuario_jogo' => $id_usuario_jogo));
+		$result = $db->delete('usuario_jogo', array('id_usuario_jogo' => $id_usuario_jogo), true);
 		
 		if ($result) {		
 			$response["error"] = false;

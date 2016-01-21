@@ -65,9 +65,12 @@ class DbHandler {
 	public function temTransacao($id_usuario_jogo) {
 		
 		$sql = "select 1
-				  from transacao t
+				  from transacao t,
+					   usuario_jogo uj
 				 where t.id_estado_transacao <> 4
-				   and (t.id_usuario_jogo_solicitante = $id_usuario_jogo or id_usuario_jogo_ofertante = $id_usuario_jogo)";
+				   and (t.id_usuario_jogo_solicitante = uj.id_usuario_jogo or t.id_usuario_jogo_ofertante = uj.id_usuario_jogo)
+				   and uj.id_usuario_jogo = $id_usuario_jogo
+				   and uj.ativo = 1";
                
 	   // insert query
 		$stmt = $this->conn->prepare($sql);
@@ -97,7 +100,8 @@ class DbHandler {
 				 where id_usuario = ".$id_usuario." and 
 					   id_jogo = ".$id_jogo." and
 					   id_plataforma = ".$id_plataforma." and
-					   id_interesse in (".$aux.")";
+					   id_interesse in (".$aux.") and
+					   ativo = 1";
                
 	   // insert query
 		$stmt = $this->conn->prepare($sql);
@@ -194,17 +198,23 @@ class DbHandler {
 		return $result;
 	}
 	
-	public function delete($tab, $ids) {
+	public function delete($tab, $ids, $logica) {
 		$and = '';
 		foreach($ids as $i => $id){
 			$and .= " and $i = '$id'";
 		}
 		
-		$sql = "delete
-				  from $tab
-				 where 1=1
-				  $and";
-		
+		if($logica){
+			$sql = "update $tab
+					   set ativo=0
+					 where 1=1
+					  $and";
+		}else{
+			$sql = "delete
+					  from $tab
+					 where 1=1
+					  $and";
+		}
 		$stmt = $this->conn->prepare($sql);
 		
 		$result = $stmt->execute();
@@ -426,7 +436,8 @@ class DbHandler {
 								 from usuario_jogo uj
 								where uj.id_jogo = j.id_jogo
 								  and uj.id_interesse in (1,2)
-								  and uj.id_usuario = $id_usuario)";
+								  and uj.id_usuario = $id_usuario
+								  and uj.ativo = 1)";
 								  
         $stmt = $this->conn->prepare($sql);
 		$stmt->execute();
@@ -455,7 +466,8 @@ class DbHandler {
 								 from usuario_jogo uj
 								where uj.id_usuario = u.id_usuario
 								  and uj.id_interesse in (1,2)
-								  and uj.id_jogo = $id_jogo)";
+								  and uj.id_jogo = $id_jogo
+								  and uj.ativo = 1)";
 		
         $stmt = $this->conn->prepare($sql);
 		$stmt->execute();
@@ -524,9 +536,9 @@ class DbHandler {
 		}
 		if($interesse){
 			if($interesse==1){
-				$and .= " and not exists (select 1 from usuario_jogo uj where uj.id_interesse in (1,2) and uj.id_usuario = $id_usuario and uj.id_jogo = j.id_jogo)";
+				$and .= " and not exists (select 1 from usuario_jogo uj where uj.ativo = 1 and uj.id_interesse in (1,2) and uj.id_usuario = $id_usuario and uj.id_jogo = j.id_jogo)";
 			}elseif($interesse==3){
-				$and .= " and exists (select 1 from usuario_jogo uj where uj.id_interesse in (1,2) and uj.id_usuario = $id_usuario and uj.id_jogo = j.id_jogo)";
+				$and .= " and exists (select 1 from usuario_jogo uj where uj.ativo = 1 and uj.id_interesse in (1,2) and uj.id_usuario = $id_usuario and uj.id_jogo = j.id_jogo)";
 			}
 		}
 		
@@ -928,7 +940,8 @@ class DbHandler {
 						left outer join plataforma pt on uj.id_plataforma_troca = pt.id_plataforma
 				  
 				  where uj.id_interesse = ".$id_interesse." and
-						u.id_usuario = ".$id_usuario."";
+						u.id_usuario = ".$id_usuario." and
+						uj.ativo = 1";
 		
 		$stmt = $this->conn->prepare($sql);
 		$stmt->execute();
@@ -1078,7 +1091,9 @@ class DbHandler {
 								ujs.id_jogo_troca is null) and
 								(ujs.id_estado_jogo = ujo.id_estado_jogo or ujs.id_estado_jogo is null) and
 								ps.id_plataforma = ujs.id_plataforma and
-								po.id_plataforma = ujo.id_plataforma)
+								po.id_plataforma = ujo.id_plataforma and
+								ujo.ativo = 1 and
+								ujs.ativo = 1)
 								
 							UNION
 							
@@ -1119,7 +1134,9 @@ class DbHandler {
 								ujs.id_jogo_troca is null) and
 								(ujs.id_estado_jogo = ujo.id_estado_jogo or ujs.id_estado_jogo is null) and
 								ps.id_plataforma = ujs.id_plataforma and
-								po.id_plataforma = ujo.id_plataforma)
+								po.id_plataforma = ujo.id_plataforma and
+								ujo.ativo = 1 and
+								ujs.ativo = 1)
 							
 							UNION
 							
@@ -1155,7 +1172,9 @@ class DbHandler {
 								ujs.preco_inicial<=ujo.preco and 
 								ujs.preco_final>=ujo.preco and
 								(ujs.id_estado_jogo = ujo.id_estado_jogo or ujs.id_estado_jogo is null) and
-							    po.id_plataforma = ujo.id_plataforma
+							    po.id_plataforma = ujo.id_plataforma and
+								ujo.ativo = 1 and
+								ujs.ativo = 1
 							order by
 								ujo.preco)
 						) as info
