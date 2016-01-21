@@ -549,7 +549,7 @@ $app->delete('/transacao/:id_transacao', function($id_transacao) {
 	
 	if ($result) {		
 		$response["error"] = false;
-		$response["message"] = "Transação recusada.";
+		$response["message"] = "Transação removida.";
 	}else{
 		$response["error"] = true;
 		$response["message"] = "Erro ao remover a Transação!";
@@ -590,7 +590,30 @@ $app->post('/transacao', function() use ($app) {
 	
 	echoRespnse(200, $response);
 });
+
+
+$app->delete('/interesse/:id_usuario_jogo', function($id_usuario_jogo) {
+	$response = array();
+	$db = new DbHandler();
+	
+	if($db->temTransacao($id_usuario_jogo)){
+		$response["error"] = true;
+		$response["message"] = "O interesse não pode ser excluído pois possui transações em curso!";
+	}else{
+				
+		$result = $db->delete('usuario_jogo', array('id_usuario_jogo' => $id_usuario_jogo));
 		
+		if ($result) {		
+			$response["error"] = false;
+			$response["message"] = "Interesse removido!";
+		}else{
+			$response["error"] = true;
+			$response["message"] = "Erro ao remover o interesse!";
+		}
+	}
+	echoRespnse(200, $response);
+});
+	
 		
 $app->get('/interesse/:id_usuario/:id_interesse', function($id_usuario, $id_interesse) {
 	

@@ -62,6 +62,23 @@ class DbHandler {
         return $response;
     }
 	
+	public function temTransacao($id_usuario_jogo) {
+		
+		$sql = "select 1
+				  from transacao t
+				 where t.id_estado_transacao <> 4
+				   and (t.id_usuario_jogo_solicitante = $id_usuario_jogo or id_usuario_jogo_ofertante = $id_usuario_jogo)";
+               
+	   // insert query
+		$stmt = $this->conn->prepare($sql);
+		$stmt->execute();
+		$stmt->store_result();
+		$result = $stmt->num_rows>0;
+		$stmt->close();
+		
+		return $result;		
+	}
+		
 	public function checkUserInterest($id_interesse, $id_usuario, $id_jogo, $id_plataforma) {
 		$response = array();
                                
