@@ -3,9 +3,7 @@ require_once '../include/DbHandler.php';
 
 $db = new DbHandler();
 
-$response = $db->getUserById(5);
-
-$foto = $response["foto"];
+$foto = $db->getFoto(9);
 
 /*
 echo "<pre>";

@@ -105,7 +105,19 @@ $app->post('/usuario_jogo', function() use ($app) {
 	
 	verifyRequiredParams(array());
 	$response = array();
-									   
+	
+	$fotos = array();
+	
+	$i = 0;
+	while(true){
+		if($app->request->post('foto'.$i)!==null){
+			$fotos[] = $app->request->post('foto'.$i);
+		}else{
+			break;
+		}		
+		$i++;
+	}
+	
 	$obj = array('id_jogo'				=> $app->request->post('id_jogo'),
 				'id_usuario'			=> $app->request->post('id_usuario'),
 				'id_interesse'			=> $app->request->post('id_interesse'),
@@ -127,19 +139,22 @@ $app->post('/usuario_jogo', function() use ($app) {
    
    if(!$result){
 
-	   $res = $db->insert('usuario_jogo', $obj);
+		$id = $db->insertID('usuario_jogo', $obj);
 
-	   if ($res) {
-			   $response["error"] = false;
-			   $response["message"] = "Interesse salvo com sucesso!";
-	   } else {
-			   $response["error"] = true;
-			   $response["message"] = "Erro ao salvar interesse!";
-	   }
-   }else{
-	   $response["error"] = true;
-	   $response["message"] = "Usuário já possui interesse conflitante!";
-   }
+		if($id!==null){
+			foreach($fotos as $f){
+				$res = $db->insert('foto', array('id_usuario_jogo' => $id, 'foto' => $f));
+			}
+			$response["error"] = false;
+			$response["message"] = "Interesse salvo com sucesso!";
+		} else {
+			$response["error"] = true;
+			$response["message"] = "Erro ao salvar interesse!";
+		}
+	}else{
+		$response["error"] = true;
+		$response["message"] = "Usuário já possui interesse conflitante!";
+	}
 
 	echoRespnse(201, $response);
 });

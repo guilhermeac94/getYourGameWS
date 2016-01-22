@@ -140,7 +140,42 @@ class DbHandler {
 		}
 		return $result;
 	}
+	
+	
+	public function insertID($tab, $obj) {
+		$response = array();
+				
+		$campos = array();
+		$valores = array();
 		
+		foreach($obj as $campo => $valor){
+			$campos[] = $campo;
+			if($campo == 'foto'){
+				$valores[] = $valor == null ? 'null' : "FROM_BASE64('".$valor."')";
+			}else{
+				$valores[] = $valor == null ? 'null' : "'".$valor."'";
+			}
+		}
+		
+		$sql = "insert into $tab
+					(".implode(',',$campos).")
+				values
+					(".implode(',',$valores).")";
+		
+		// insert query
+		$stmt = $this->conn->prepare($sql);
+		$result = $stmt->execute();
+		$stmt->store_result();
+		$id = mysqli_insert_id($this->conn);
+		$stmt->close();
+		
+		if($result){
+			return $id;
+		}
+		return null;
+	}
+	
+	
 	public function insert($tab, $obj) {
         $response = array();
 				
@@ -148,8 +183,14 @@ class DbHandler {
 		$valores = array();
 		
 		foreach($obj as $campo => $valor){
+			
 			$campos[] = $campo;
-			$valores[] = $valor == null ? 'null' : "'".$valor."'";
+			
+			if($campo == 'foto'){
+				$valores[] = $valor == null ? 'null' : "FROM_BASE64('".$valor."')";
+			}else{
+				$valores[] = $valor == null ? 'null' : "'".$valor."'";
+			}
 		}
 		
 		$sql = "insert into $tab
@@ -221,6 +262,21 @@ class DbHandler {
 		$stmt->close();
 		
 		return $result;
+	}
+	
+	public function getFoto($id_foto){
+		$sql = "select foto
+				  from foto
+				 where id_foto = $id_foto";
+        
+		$stmt = $this->conn->prepare($sql);
+        if ($stmt->execute()) {
+            $user = $stmt->get_result()->fetch_assoc();
+            $stmt->close();
+            return $user["foto"];
+        } else {
+            return NULL;
+        }
 	}
 	
     /**
@@ -1000,7 +1056,9 @@ class DbHandler {
 						ujo.id_usuario_jogo = ".$id_usuario_jogo_ofert." and
 						ujo.id_usuario = uo.id_usuario and 
 						ujo.id_jogo = jo.id_jogo and
-						ujo.id_plataforma = po.id_plataforma";
+						ujo.id_plataforma = po.id_plataforma and
+						ujs.ativo = 1 and
+						ujo.ativo = 1";
 						
 		$stmt = $this->conn->prepare($sql);
 		$stmt->execute();
