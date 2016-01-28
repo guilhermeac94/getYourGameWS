@@ -530,6 +530,12 @@ $app->put('/transacao/:id', function($id_transacao) use($app) {
 	
 	$result = $db->update('transacao', array('id_transacao' => $id_transacao), $obj);
 	
+	if($app->request->put('id_estado_transacao')!==null){
+		if($obj['id_estado_transacao'] == 3){
+			$db->deletaInteresses($id_transacao);
+		}
+	}
+	
 	if ($result) {
 		
 		$response["error"] = false;
@@ -619,7 +625,7 @@ $app->delete('/interesse/:id_usuario_jogo', function($id_usuario_jogo) {
 				
 		$result = $db->delete('usuario_jogo', array('id_usuario_jogo' => $id_usuario_jogo), true);
 		
-		if ($result) {		
+		if ($result) {
 			$response["error"] = false;
 			$response["message"] = "Interesse removido!";
 		}else{

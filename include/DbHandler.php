@@ -264,6 +264,22 @@ class DbHandler {
 		return $result;
 	}
 	
+	public function deletaInteresses($id_transacao){
+		$sql = "select id_usuario_jogo_solicitante,
+					   id_usuario_jogo_ofertante
+				  from transacao
+				 where id_transacao = $id_transacao";
+        
+		$stmt = $this->conn->prepare($sql);
+        if ($stmt->execute()) {
+            $int = $stmt->get_result()->fetch_assoc();
+            $stmt->close();
+			
+			$result = $this->delete('usuario_jogo', array('id_usuario_jogo' => $int["id_usuario_jogo_solicitante"]), true);
+			$result = $this->delete('usuario_jogo', array('id_usuario_jogo' => $int["id_usuario_jogo_ofertante"]), true);	
+		}
+	}
+	
 	public function getFoto($id_foto){
 		$sql = "select foto
 				  from foto
