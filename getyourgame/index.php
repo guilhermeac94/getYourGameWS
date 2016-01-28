@@ -755,8 +755,16 @@ $app->get('/cadastros', function() use ($app) {
 	echoRespnse(200, $response);
 });		
 
-		
-		
+$app->get('/fotos/:id', function($id_usuario_jogo){
+	$response = array();
+	$db = new DbHandler();
+
+	$response = $db->getFotos($id_usuario_jogo);
+	
+	echoRespnse(200, $response);
+});
+
+
 /*
  * ------------------------ METHODS WITH AUTHENTICATION ------------------------
  */

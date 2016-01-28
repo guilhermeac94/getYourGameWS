@@ -781,6 +781,26 @@ class DbHandler {
 		return $response;
 	}
 	
+	public function getFotos($id_usuario_jogo){
+		$sql = "SELECT id_foto, foto FROM foto WHERE id_usuario_jogo = $id_usuario_jogo";
+				   
+		$stmt = $this->conn->prepare($sql);
+		$stmt->execute();
+		$foto = $stmt->get_result();
+        $stmt->close();
+		
+		$response = array();
+		
+		while ($f = $foto->fetch_assoc()) {
+			$ft = array();
+			$ft["id_foto"] = $f["id_foto"];
+            $ft["foto"]    = base64_encode($f["foto"]);
+			array_push($response, $ft);
+        }
+		return count($response)>0?$response:null;
+	}	
+	
+	
 	public function getAvaliacoes($id_usuario){
 		$sql = "select a.*,
 					   u.nome,
@@ -843,6 +863,7 @@ class DbHandler {
 						(select ejs.descricao from estado_jogo ejs where ejs.id_estado_jogo = ujs.id_estado_jogo) as estado_jogo,
 						js.foto as foto_jogo,
 						ujs.id_usuario_jogo,
+						(select count(0) from foto fs where fs.id_usuario_jogo = ujs.id_usuario_jogo) qtd_foto,
 						
 						ujo.id_interesse as id_interesse_ofert,
 						uo.id_usuario as id_usuario_ofert,
@@ -854,7 +875,8 @@ class DbHandler {
 						(select ejo.descricao from estado_jogo ejo where ejo.id_estado_jogo = ujo.id_estado_jogo) as estado_jogo_ofert,
 						jo.foto as foto_jogo_ofert,
 						ujo.preco as preco_jogo_ofert,
-						ujo.id_usuario_jogo as id_usuario_jogo_ofert
+						ujo.id_usuario_jogo as id_usuario_jogo_ofert,
+						(select count(0) from foto fo where fo.id_usuario_jogo = ujo.id_usuario_jogo) qtd_foto_ofert
 					from 
 						usuario_jogo ujs,
 						usuario_jogo ujo,
@@ -897,6 +919,7 @@ class DbHandler {
 		$tr["estado_jogo"] 					= $t["estado_jogo"];
 		//$tr["foto_jogo"] 					= base64_encode($t["foto_jogo"]);
 		$tr["id_usuario_jogo"] 				= $t["id_usuario_jogo"];
+		$tr["qtd_foto"] 					= $t["qtd_foto"];
 		$tr["id_interesse_ofert"] 			= $t["id_interesse_ofert"];
 		$tr["id_usuario_ofert"] 			= $t["id_usuario_ofert"];
 		$tr["metodo_envio_ofert"]			= $t["metodo_envio_ofert"];
@@ -908,6 +931,7 @@ class DbHandler {
 		//$tr["foto_jogo_ofert"] 			= base64_encode($t["foto_jogo_ofert"]);
 		$tr["preco_jogo_ofert"] 			= $t["preco_jogo_ofert"];
 		$tr["id_usuario_jogo_ofert"]		= $t["id_usuario_jogo_ofert"];
+		$tr["qtd_foto_ofert"] 				= $t["qtd_foto_ofert"];
 		
 		return $tr;
 	}
@@ -1043,6 +1067,7 @@ class DbHandler {
 						(select ejs.descricao from estado_jogo ejs where ejs.id_estado_jogo = ujs.id_estado_jogo) as estado_jogo,
 						js.foto as foto_jogo,
 						ujs.id_usuario_jogo,
+						(select count(0) from foto fs where fs.id_usuario_jogo = ujs.id_usuario_jogo) qtd_foto,
 						
 						ujo.id_interesse as id_interesse_ofert,
 						uo.id_usuario as id_usuario_ofert,
@@ -1054,7 +1079,8 @@ class DbHandler {
 						(select ejo.descricao from estado_jogo ejo where ejo.id_estado_jogo = ujo.id_estado_jogo) as estado_jogo_ofert,
 						jo.foto as foto_jogo_ofert,
 						ujo.preco as preco_jogo_ofert,
-						ujo.id_usuario_jogo as id_usuario_jogo_ofert
+						ujo.id_usuario_jogo as id_usuario_jogo_ofert,
+						(select count(0) from foto fo where fo.id_usuario_jogo = ujo.id_usuario_jogo) qtd_foto_ofert
 					from 
 						usuario_jogo ujs,
 						usuario_jogo ujo,
@@ -1093,6 +1119,7 @@ class DbHandler {
 		$op["estado_jogo"] 					= $o["estado_jogo"];
 		//$op["foto_jogo"] 					= base64_encode($o["foto_jogo"]);
 		$op["id_usuario_jogo"] 				= $o["id_usuario_jogo"];
+		$op["qtd_foto"] 					= $o["qtd_foto"];
 		$op["id_interesse_ofert"] 			= $o["id_interesse_ofert"];
 		$op["id_usuario_ofert"] 			= $o["id_usuario_ofert"];
 		$op["metodo_envio_ofert"]			= $o["metodo_envio_ofert"];
@@ -1104,6 +1131,7 @@ class DbHandler {
 		//$op["foto_jogo_ofert"] 			= base64_encode($o["foto_jogo_ofert"]);
 		$op["preco_jogo_ofert"] 			= $o["preco_jogo_ofert"];
 		$op["id_usuario_jogo_ofert"]		= $o["id_usuario_jogo_ofert"];
+		$op["qtd_foto_ofert"] 				= $o["qtd_foto_ofert"];
 		
 		return $op;
 	}
