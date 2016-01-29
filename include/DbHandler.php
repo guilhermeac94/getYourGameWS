@@ -1139,25 +1139,26 @@ class DbHandler {
 	
 	public function getOportunidades($id_usuario) {
 		
-        $sql = "select prioridade,
-					   id_interesse,
-					   descricao_jogo,
-					   plataforma_jogo,
-					   foto_jogo,
-					   id_usuario_jogo,
-					   id_usuario_ofert,
-					   nome_ofert,
-					   id_jogo_ofert,
-					   descricao_jogo_ofert,
-					   plataforma_jogo_ofert,
-					   foto_jogo_ofert,
-					   preco_jogo_ofert,
-					   id_usuario_jogo_ofert,
-					   
-					   ifnull((select 1 from transacao t where (t.id_usuario_jogo_solicitante = info.id_usuario_jogo and t.id_usuario_jogo_ofertante = info.id_usuario_jogo_ofert)),0) as existe_transacao
-					   
-				  from (	(select
-								1 as prioridade,
+        $sql = "select  prioridade,
+						id_interesse,
+						descricao_jogo,
+						plataforma_jogo,
+						foto_jogo,
+						id_usuario_jogo,
+						id_usuario_ofert,
+						nome_ofert,
+						id_jogo_ofert,
+						descricao_jogo_ofert,
+						plataforma_jogo_ofert,
+						foto_jogo_ofert,
+						preco_jogo_ofert,
+						id_usuario_jogo_ofert,	   
+						ifnull((select 1 from transacao t where (t.id_usuario_jogo_solicitante = info.id_usuario_jogo and t.id_usuario_jogo_ofertante = info.id_usuario_jogo_ofert)),0) as existe_transacao
+
+				  from  (
+						
+						(select 1 as prioridade,
+
 								ujs.id_interesse,
 								js.descricao as descricao_jogo,
 								ps.descricao as plataforma_jogo,
@@ -1171,36 +1172,149 @@ class DbHandler {
 								jo.foto as foto_jogo_ofert,
 								null as preco_jogo_ofert,
 								ujo.id_usuario_jogo as id_usuario_jogo_ofert
-							from 
-								usuario_jogo ujs,
+						  
+						  from 	usuario_jogo ujs,
 								usuario_jogo ujo,
+								usuario us,
 								usuario uo,
 								jogo js,
 								jogo jo,
 								plataforma ps,
 								plataforma po
-							where 
-								ujs.id_usuario = ".$id_usuario." and 
-								ujs.id_interesse = 3 and	
-								ujo.id_interesse = 1 and
-								uo.id_usuario = ujo.id_usuario and 
-								js.id_jogo = ujs.id_jogo and
-								jo.id_jogo = ujo.id_jogo and
-								ujs.id_jogo = ujo.id_jogo and
-								ujs.id_plataforma = ujo.id_plataforma and
-								((ujs.id_jogo_troca = ujo.id_jogo_troca and 
-								ujs.id_plataforma_troca = ujo.id_plataforma_troca) or 
-								ujs.id_jogo_troca is null) and
-								(ujs.id_estado_jogo = ujo.id_estado_jogo or ujs.id_estado_jogo is null) and
-								ps.id_plataforma = ujs.id_plataforma and
-								po.id_plataforma = ujo.id_plataforma and
-								ujo.ativo = 1 and
-								ujs.ativo = 1)
 								
-							UNION
+						  where ujs.id_usuario = us.id_usuario
+							and ujo.id_usuario = uo.id_usuario
+							and ujs.id_jogo_troca = js.id_jogo
+							and ujo.id_jogo = jo.id_jogo
+							and ujs.id_plataforma_troca = ps.id_plataforma
+							and ujo.id_plataforma = po.id_plataforma
+						  
+							and ujs.id_interesse = 3
+							and ujo.id_interesse = 1
 							
-							(select 
-								2 as prioridade,
+							and ujs.id_jogo = ujo.id_jogo
+							and ujs.id_plataforma = ujo.id_plataforma	
+							
+							and ujs.id_jogo_troca = ujo.id_jogo_troca
+							and ujs.id_plataforma_troca = ujo.id_plataforma_troca
+							
+							and (ifnull(ujs.id_estado_jogo, us.id_estado_jogo) = ujo.id_estado_jogo
+							or	(ujs.id_estado_jogo is null
+							and us.id_estado_jogo is null
+							and ujo.id_estado_jogo is not null) 
+							or (ujs.id_estado_jogo is null
+							and ujo.id_estado_jogo is null))
+							
+							and ujs.id_usuario = $id_usuario
+							
+						  order by ujo.id_estado_jogo desc)
+							
+						union
+
+						(select 3 as prioridade,
+
+								ujs.id_interesse,
+								null as descricao_jogo,
+								null as plataforma_jogo,
+								null as foto_jogo,
+								ujs.id_usuario_jogo,
+								uo.id_usuario as id_usuario_ofert,
+								uo.nome as nome_ofert,
+								jo.id_jogo as id_jogo_ofert,
+								jo.descricao as descricao_jogo_ofert,
+								po.descricao as plataforma_jogo_ofert,
+								jo.foto as foto_jogo_ofert,
+								null as preco_jogo_ofert,
+								ujo.id_usuario_jogo as id_usuario_jogo_ofert
+						  
+						  from 	usuario_jogo ujs,
+								usuario_jogo ujo,
+								usuario us,
+								usuario uo,
+								jogo jo,
+								plataforma po
+								
+						  where ujs.id_usuario = us.id_usuario
+							and ujo.id_usuario = uo.id_usuario
+							and ujo.id_jogo = jo.id_jogo
+							and ujo.id_plataforma = po.id_plataforma
+						  
+							and ujs.id_interesse = 3
+							and ujo.id_interesse = 1
+							
+							and ujs.id_jogo = ujo.id_jogo
+							and ujs.id_plataforma = ujo.id_plataforma	
+							
+							and ujs.id_jogo_troca is null
+							and ujo.id_jogo_troca is null
+							
+							and (ifnull(ujs.id_estado_jogo, us.id_estado_jogo) = ujo.id_estado_jogo
+							or	(ujs.id_estado_jogo is null
+							and us.id_estado_jogo is null
+							and ujo.id_estado_jogo is not null) 
+							or (ujs.id_estado_jogo is null
+							and ujo.id_estado_jogo is null))
+							
+							and ujs.id_usuario = $id_usuario
+							
+						  order by ujo.id_estado_jogo desc)
+						  
+						union
+
+						(select 5 as prioridade,
+
+								ujs.id_interesse,
+								null as descricao_jogo,
+								null as plataforma_jogo,
+								null as foto_jogo,
+								ujs.id_usuario_jogo,
+								uo.id_usuario as id_usuario_ofert,
+								uo.nome as nome_ofert,
+								jo.id_jogo as id_jogo_ofert,
+								jo.descricao as descricao_jogo_ofert,
+								po.descricao as plataforma_jogo_ofert,
+								jo.foto as foto_jogo_ofert,
+								null as preco_jogo_ofert,
+								ujo.id_usuario_jogo as id_usuario_jogo_ofert
+						  
+						  from 	usuario_jogo ujs,
+								usuario_jogo ujo,
+								usuario us,
+								usuario uo,
+								jogo js,
+								jogo jo,
+								plataforma ps,
+								plataforma po
+								
+						  where ujs.id_usuario = us.id_usuario
+							and ujo.id_usuario = uo.id_usuario
+							and ujo.id_jogo = jo.id_jogo
+							and ujo.id_plataforma = po.id_plataforma
+						  
+							and ujs.id_interesse = 3
+							and ujo.id_interesse = 1
+							
+							and ujs.id_jogo = ujo.id_jogo
+							and ujs.id_plataforma = ujo.id_plataforma	
+							
+							and ujs.id_jogo_troca is null
+							and ujo.id_jogo_troca is not null
+							
+							and (ifnull(ujs.id_estado_jogo, us.id_estado_jogo) = ujo.id_estado_jogo
+							or	(ujs.id_estado_jogo is null
+							and us.id_estado_jogo is null
+							and ujo.id_estado_jogo is not null) 
+							or (ujs.id_estado_jogo is null
+							and ujo.id_estado_jogo is null))
+							
+							and ujs.id_usuario = $id_usuario
+							
+						  order by ujo.id_estado_jogo desc) 
+						
+						union
+
+						(select 7 as prioridade,
+
 								ujs.id_interesse,
 								js.descricao as descricao_jogo,
 								ps.descricao as plataforma_jogo,
@@ -1214,36 +1328,47 @@ class DbHandler {
 								jo.foto as foto_jogo_ofert,
 								null as preco_jogo_ofert,
 								ujo.id_usuario_jogo as id_usuario_jogo_ofert
-							from 
-								usuario_jogo ujs,
+						  
+						  from 	usuario_jogo ujs,
 								usuario_jogo ujo,
+								usuario us,
 								usuario uo,
 								jogo js,
 								jogo jo,
 								plataforma ps,
 								plataforma po
-							where 
-								ujs.id_usuario = ".$id_usuario." and 
-								ujs.id_interesse = 1 and
-								ujo.id_interesse = 3 and
-								uo.id_usuario = ujo.id_usuario and 
-								js.id_jogo = ujs.id_jogo and
-								jo.id_jogo = ujo.id_jogo and
-								ujs.id_jogo = ujo.id_jogo and
-								ujs.id_plataforma = ujo.id_plataforma and
-								((ujs.id_jogo_troca = ujo.id_jogo_troca and 
-								ujs.id_plataforma_troca = ujo.id_plataforma_troca) or
-								ujs.id_jogo_troca is null) and
-								(ujs.id_estado_jogo = ujo.id_estado_jogo or ujs.id_estado_jogo is null) and
-								ps.id_plataforma = ujs.id_plataforma and
-								po.id_plataforma = ujo.id_plataforma and
-								ujo.ativo = 1 and
-								ujs.ativo = 1)
+								
+						  where ujs.id_usuario = us.id_usuario
+							and ujo.id_usuario = uo.id_usuario
+							and ujs.id_jogo_troca = js.id_jogo
+							and ujo.id_jogo = jo.id_jogo
+							and ujs.id_plataforma_troca = ps.id_plataforma
+							and ujo.id_plataforma = po.id_plataforma
+						  
+							and ujs.id_interesse = 3
+							and ujo.id_interesse = 1
 							
-							UNION
+							and ujs.id_jogo = ujo.id_jogo
+							and ujs.id_plataforma = ujo.id_plataforma	
 							
-							(select
-								3 as prioridade,
+							and ujs.id_jogo_troca is not null
+							and ujo.id_jogo_troca is null
+							
+							and (ifnull(ujs.id_estado_jogo, us.id_estado_jogo) = ujo.id_estado_jogo
+							or	(ujs.id_estado_jogo is null
+							and us.id_estado_jogo is null
+							and ujo.id_estado_jogo is not null) 
+							or (ujs.id_estado_jogo is null
+							and ujo.id_estado_jogo is null))
+							
+							and ujs.id_usuario = $id_usuario
+							
+						  order by ujo.id_estado_jogo desc)
+				  
+						union  
+				  
+						(select 2 as prioridade,
+
 								ujs.id_interesse,
 								null as descricao_jogo,
 								null as plataforma_jogo,
@@ -1257,34 +1382,140 @@ class DbHandler {
 								jo.foto as foto_jogo_ofert,
 								ujo.preco as preco_jogo_ofert,
 								ujo.id_usuario_jogo as id_usuario_jogo_ofert
-							from
-								usuario_jogo ujs,
+						  
+						  from 	usuario_jogo ujs,
 								usuario_jogo ujo,
+								usuario us,
 								usuario uo,
+								jogo js,
 								jogo jo,
+								plataforma ps,
 								plataforma po
-							where 
-								ujs.id_usuario = ".$id_usuario." and 
-								ujs.id_interesse = 4 and
-								ujo.id_interesse = 2 and
-								uo.id_usuario = ujo.id_usuario and 
-								jo.id_jogo = ujo.id_jogo and
-								ujs.id_jogo = ujo.id_jogo and
-								ujs.id_plataforma = ujo.id_plataforma and
-								ujs.preco_inicial<=ujo.preco and 
-								ujs.preco_final>=ujo.preco and
-								(ujs.id_estado_jogo = ujo.id_estado_jogo or ujs.id_estado_jogo is null) and
-							    po.id_plataforma = ujo.id_plataforma and
-								ujo.ativo = 1 and
-								ujs.ativo = 1
-							order by
-								ujo.preco)
+								
+						  where ujs.id_usuario = us.id_usuario
+							and ujo.id_usuario = uo.id_usuario
+							and ujs.id_jogo = js.id_jogo
+							and ujo.id_jogo = jo.id_jogo
+							and ujs.id_plataforma = ps.id_plataforma
+							and ujo.id_plataforma = po.id_plataforma
+						  
+							and ujs.id_interesse = 4
+							and ujo.id_interesse = 2
+							
+							and ujs.id_jogo = ujo.id_jogo
+							and ujs.id_plataforma = ujo.id_plataforma	
+							and ujo.preco between ujs.preco_inicial and ujs.preco_final
+							
+							and ifnull(ujs.id_estado_jogo, us.id_estado_jogo) = ujo.id_estado_jogo
+							
+							and ujs.id_usuario = $id_usuario
+							
+						  order by ujo.id_estado_jogo desc, ujo.preco)
+							
+						union
+
+						(select 4 as prioridade,
+
+								ujs.id_interesse,
+								null as descricao_jogo,
+								null as plataforma_jogo,
+								null as foto_jogo,
+								ujs.id_usuario_jogo,
+								uo.id_usuario as id_usuario_ofert,
+								uo.nome as nome_ofert,
+								jo.id_jogo as id_jogo_ofert,
+								jo.descricao as descricao_jogo_ofert,
+								po.descricao as plataforma_jogo_ofert,
+								jo.foto as foto_jogo_ofert,
+								ujo.preco as preco_jogo_ofert,
+								ujo.id_usuario_jogo as id_usuario_jogo_ofert
+						  
+						  from 	usuario_jogo ujs,
+								usuario_jogo ujo,
+								usuario us,
+								usuario uo,
+								jogo js,
+								jogo jo,
+								plataforma ps,
+								plataforma po
+								
+						  where ujs.id_usuario = us.id_usuario
+							and ujo.id_usuario = uo.id_usuario
+							and ujs.id_jogo = js.id_jogo
+							and ujo.id_jogo = jo.id_jogo
+							and ujs.id_plataforma = ps.id_plataforma
+							and ujo.id_plataforma = po.id_plataforma
+							
+							and ujs.id_interesse = 4
+							and ujo.id_interesse = 2
+							
+							and ujs.id_jogo = ujo.id_jogo
+							and ujs.id_plataforma = ujo.id_plataforma	
+							and ujo.preco between ujs.preco_inicial and ujs.preco_final
+							
+							and ujs.id_estado_jogo is null
+							and us.id_estado_jogo is null
+							and ujo.id_estado_jogo is not null
+							
+							and ujs.id_usuario = $id_usuario
+							
+						  order by ujo.id_estado_jogo desc, ujo.preco)
+						  
+						union
+
+						(select 6 as prioridade,
+
+								ujs.id_interesse,
+								null as descricao_jogo,
+								null as plataforma_jogo,
+								null as foto_jogo,
+								ujs.id_usuario_jogo,
+								uo.id_usuario as id_usuario_ofert,
+								uo.nome as nome_ofert,
+								jo.id_jogo as id_jogo_ofert,
+								jo.descricao as descricao_jogo_ofert,
+								po.descricao as plataforma_jogo_ofert,
+								jo.foto as foto_jogo_ofert,
+								ujo.preco as preco_jogo_ofert,
+								ujo.id_usuario_jogo as id_usuario_jogo_ofert
+						  
+						  from 	usuario_jogo ujs,
+								usuario_jogo ujo,
+								usuario us,
+								usuario uo,
+								jogo js,
+								jogo jo,
+								plataforma ps,
+								plataforma po
+								
+						  where ujs.id_usuario = us.id_usuario
+							and ujo.id_usuario = uo.id_usuario
+							and ujs.id_jogo = js.id_jogo
+							and ujo.id_jogo = jo.id_jogo
+							and ujs.id_plataforma = ps.id_plataforma
+							and ujo.id_plataforma = po.id_plataforma
+						  
+							and ujs.id_interesse = 4
+							and ujo.id_interesse = 2
+							
+							and ujs.id_jogo = ujo.id_jogo
+							and ujs.id_plataforma = ujo.id_plataforma	
+							and ujo.preco between ujs.preco_inicial and ujs.preco_final
+							
+							and ujs.id_estado_jogo is null
+							and ujo.id_estado_jogo is null
+							
+							and ujs.id_usuario = $id_usuario
+							
+						  order by ujo.preco)
+						
 						) as info
-					where not exists (select *
-										from transacao t
-									   where (t.id_usuario_jogo_solicitante = info.id_usuario_jogo and t.id_usuario_jogo_ofertante = info.id_usuario_jogo_ofert)
-									     and t.id_estado_transacao <> 1)
-				 order by prioridade";
+						  
+				  where not exists (select 1
+									  from transacao t
+									 where (t.id_usuario_jogo_solicitante = info.id_usuario_jogo and t.id_usuario_jogo_ofertante = info.id_usuario_jogo_ofert)
+									   and t.id_estado_transacao <> 1)
+				  order by prioridade";
 		
 		$stmt = $this->conn->prepare($sql);
 		$stmt->execute();
