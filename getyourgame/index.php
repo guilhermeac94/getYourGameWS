@@ -32,7 +32,7 @@ function authenticate(\Slim\Route $route) {
             // api key is not present in users table
             $response["error"] = true;
             $response["message"] = "Access Denied. Invalid Api key";
-            echoRespnse(401, $response);
+            echoResponse(401, $response);
             $app->stop();
         } else {
             global $user_id;
@@ -43,7 +43,7 @@ function authenticate(\Slim\Route $route) {
         // api key is missing in header
         $response["error"] = true;
         $response["message"] = "Api key is misssing";
-        echoRespnse(400, $response);
+        echoResponse(400, $response);
         $app->stop();
     }
 }
@@ -62,7 +62,7 @@ $app->get('/teste', function() use ($app) {
 	$response = array();
 	$response["id"] = 1;
 	$response["content"] = 'Web Service consumido com sucesso!!!';
-	echoRespnse(201, $response);
+	echoResponse(201, $response);
 });
  
 $app->post('/cadastro', function() use ($app) {
@@ -98,7 +98,7 @@ $app->post('/cadastro', function() use ($app) {
                 $response["message"] = "Usuário já existente";
             }
             // echo json response
-            echoRespnse(201, $response);
+            echoResponse(201, $response);
         });
 
 $app->post('/usuario_jogo', function() use ($app) {
@@ -156,7 +156,7 @@ $app->post('/usuario_jogo', function() use ($app) {
 		$response["message"] = "Usuário já possui interesse conflitante!";
 	}
 
-	echoRespnse(201, $response);
+	echoResponse(201, $response);
 });
 		
 $app->put('/usuario/:id', function($id_usuario) use($app) {
@@ -183,7 +183,7 @@ $app->put('/usuario/:id', function($id_usuario) use($app) {
 				$response["error"] = true;
                 $response["message"] = "Erro ao atualizar o usuário!";
             }
-            echoRespnse(200, $response);
+            echoResponse(200, $response);
         });
 
 		
@@ -214,7 +214,7 @@ $app->get('/endereco/:id', function($id_usuario) use($app) {
 		$response["message"] = "Nenhum endereço encontrado!";
    }
 			   
-	echoRespnse(200, $response);
+	echoResponse(200, $response);
 });
 
 
@@ -231,7 +231,7 @@ $app->get('/contato_transacao/:id', function($id_usuario) use($app) {
 		$response = null;
 	}		
 	
-	echoRespnse(200, $response);
+	echoResponse(200, $response);
 });
 
 
@@ -249,7 +249,7 @@ $app->get('/contato/:id', function($id_usuario) use($app) {
 		$response['message'] = 'Nenhum contato encontrado!';
 	}		
 	
-	echoRespnse(200, $response);
+	echoResponse(200, $response);
 });
 		
 		
@@ -321,7 +321,7 @@ $app->put('/contato/:id', function($id_usuario) use($app) {
 				$response["error"] = false;
 				$response["message"] = "Nenhum dado gravado!";
 			}
-            echoRespnse(200, $response);
+            echoResponse(200, $response);
         });
 
 $app->post('/login', function() use ($app) {
@@ -363,7 +363,7 @@ $app->post('/login', function() use ($app) {
                 $response['message'] = 'Falha no Login! Credenciais inválidas.';
             }
 
-            echoRespnse(200, $response);
+            echoResponse(200, $response);
         });
 
 
@@ -383,10 +383,10 @@ $app->get('/usuario_email/:email' , function($email) {
 				$response['chave_api'] = $result['chave_api'];
 				
 				$response['tem_transacao'] = $db->getTransacaoByUser($result['id_usuario']);
-				echoRespnse(200, $response);
+				echoResponse(200, $response);
 			} else {
 				$response["error"] = true;
-				echoRespnse(200, $response);
+				echoResponse(200, $response);
 			}
 		});
 
@@ -399,24 +399,17 @@ $app->get('/usuario/:id', 'authenticate', function($id_usuario) {
             $result = $db->getUserById($id_usuario);
 
             if ($result != NULL) {
-				/*
-                $response["error"] = false;
-                $response["id"] = $result["id"];
-                $response["task"] = $result["task"];
-                $response["status"] = $result["status"];
-                $response["createdAt"] = $result["created_at"];
-				*/
 				$response["error"] = false;
 				$response['id_usuario'] = $result['id_usuario'];
 				$response['nome'] = $result['nome'];
 				$response['email'] = $result['email'];
 				$response['chave_api'] = $result['chave_api'];
 				$response['foto'] = $result['foto'];
-                echoRespnse(200, $response);
+                echoResponse(200, $response);
             } else {
                 $response["error"] = true;
                 $response["message"] = "O usuário informado não existe!";
-                echoRespnse(200, $response);
+                echoResponse(200, $response);
             }
         });
 		
@@ -427,7 +420,7 @@ $app->get('/preferencias/:id', function($id_usuario) {
 
             // fetch task
             $response = $db->getPreferencias($id_usuario);
-			echoRespnse(200, $response);
+			echoResponse(200, $response);
         });
 
 
@@ -437,7 +430,7 @@ $app->get('/avaliacoes_usuario/:id_usuario', function($id_usuario){
 
 	// fetch task
 	$response = $db->getAvaliacoes($id_usuario);
-	echoRespnse(200, $response);
+	echoResponse(200, $response);
 });
 		
 $app->get('/avaliacao_transacao/:id_transacao/:id_usuario_avaliador', function($id_transacao, $id_usuario_avaliador) {
@@ -459,7 +452,7 @@ $app->get('/avaliacao_transacao/:id_transacao/:id_usuario_avaliador', function($
 		$response = null;
 	}
 		
-	echoRespnse(200, $response);	
+	echoResponse(200, $response);	
 });
 		
 		
@@ -496,7 +489,7 @@ $app->post('/avaliacao_transacao', function() use($app) {
 		$response["message"] = "Ocorreu um erro ao salvar a avaliação!";
 	}
 	
-	echoRespnse(200, $response);
+	echoResponse(200, $response);
 });
 		
 $app->get('/dados_transacao/:id', function($id_transacao) {
@@ -505,7 +498,7 @@ $app->get('/dados_transacao/:id', function($id_transacao) {
 	$db = new DbHandler();
 	
 	$response = $db->getDadosTransacao($id_transacao);
-	echoRespnse(200, $response);
+	echoResponse(200, $response);
 });
 
 
@@ -559,7 +552,7 @@ $app->put('/transacao/:id', function($id_transacao) use($app) {
 		$response["error"] = true;
 		$response["message"] = "Erro ao atualizar a transação!";
 	}
-	echoRespnse(200, $response);
+	echoResponse(200, $response);
 });
 
 
@@ -577,7 +570,7 @@ $app->delete('/transacao/:id_transacao', function($id_transacao) {
 		$response["message"] = "Erro ao remover a Transação!";
 	}
 	
-	echoRespnse(200, $response);
+	echoResponse(200, $response);
 });
 
 
@@ -588,7 +581,7 @@ $app->get('/transacao/:id_usuario/:status', function($id_usuario, $status) {
 	$db = new DbHandler();
 		
 	$response = $db->getTransacoes($id_usuario, $status);
-	echoRespnse(200, $response);
+	echoResponse(200, $response);
 });
 		
 $app->post('/transacao', function() use ($app) {
@@ -610,7 +603,7 @@ $app->post('/transacao', function() use ($app) {
 	
 	$response = $db->insert('transacao', $obj);
 	
-	echoRespnse(200, $response);
+	echoResponse(200, $response);
 });
 
 
@@ -633,7 +626,7 @@ $app->delete('/interesse/:id_usuario_jogo', function($id_usuario_jogo) {
 			$response["message"] = "Erro ao remover o interesse!";
 		}
 	}
-	echoRespnse(200, $response);
+	echoResponse(200, $response);
 });
 	
 		
@@ -644,7 +637,7 @@ $app->get('/interesse/:id_usuario/:id_interesse', function($id_usuario, $id_inte
 	$db = new DbHandler();
 		
 	$response = $db->getInteresses($id_usuario, $id_interesse);
-	echoRespnse(200, $response);
+	echoResponse(200, $response);
 });
 		
 $app->get('/dados_oportunidade/:id_usuario_jogo_solic/:id_usuario_jogo_ofert', function($id_usuario_jogo_solic, $id_usuario_jogo_ofert) {
@@ -653,7 +646,7 @@ $app->get('/dados_oportunidade/:id_usuario_jogo_solic/:id_usuario_jogo_ofert', f
 	$db = new DbHandler();
 
 	$response = $db->getDadosOportunidade($id_usuario_jogo_solic, $id_usuario_jogo_ofert);
-	echoRespnse(200, $response);
+	echoResponse(200, $response);
 });
 		
 $app->get('/oportunidades/:id', function($id_usuario) {
@@ -662,7 +655,7 @@ $app->get('/oportunidades/:id', function($id_usuario) {
 	$db = new DbHandler();
 
 	$response = $db->getOportunidades($id_usuario);
-	echoRespnse(200, $response);
+	echoResponse(200, $response);
 });
 
 //$app->get('/usuario/:id', 'authenticate', function() {
@@ -674,7 +667,7 @@ $app->get('/estado_jogo', function() use ($app) {
             // fetch task
             $response = $db->getTodosEstadoJogo();
 			
-			echoRespnse(200, $response);
+			echoResponse(200, $response);
 		});
 
 $app->post('/usuarios', function() use ($app) {	
@@ -688,7 +681,7 @@ $app->post('/usuarios', function() use ($app) {
             // fetch task
             $response = $db->getTodosUsuarios($filtro);
 			
-			echoRespnse(200, $response);
+			echoResponse(200, $response);
 		});
 
 $app->post('/jogo', function() use ($app) {	
@@ -713,7 +706,7 @@ $app->post('/jogo', function() use ($app) {
 			// fetch task
 			$response = $db->getTodosJogos($filtro,$interesse,$id_usuario);
 			
-			echoRespnse(200, $response);
+			echoResponse(200, $response);
 });	
 
 $app->get('/jogos_do_usuario/:id', function($id_usuario) {
@@ -723,7 +716,7 @@ $app->get('/jogos_do_usuario/:id', function($id_usuario) {
 	// fetch task
 	$response = $db->getJogosDoUsuario($id_usuario);
 
-	echoRespnse(200, $response);
+	echoResponse(200, $response);
 });
 
 $app->get('/usuario_tem_jogo/:id', function($id_jogo) {	
@@ -733,7 +726,7 @@ $app->get('/usuario_tem_jogo/:id', function($id_jogo) {
 	// fetch task
 	$response = $db->getUsuarioTemJogo($id_jogo);
 
-	echoRespnse(200, $response);
+	echoResponse(200, $response);
 });
 
 $app->get('/jogo/:id', function($id_jogo) {	
@@ -743,7 +736,7 @@ $app->get('/jogo/:id', function($id_jogo) {
 			// fetch task
 			$response = $db->getJogo($id_jogo);
 			
-			echoRespnse(200, $response);
+			echoResponse(200, $response);
 });
 		
 $app->get('/cadastros', function() use ($app) {
@@ -752,7 +745,7 @@ $app->get('/cadastros', function() use ($app) {
 
 	$response = $db->getTodosCadastros();
 	
-	echoRespnse(200, $response);
+	echoResponse(200, $response);
 });		
 
 $app->get('/fotos/:id', function($id_usuario_jogo){
@@ -761,155 +754,13 @@ $app->get('/fotos/:id', function($id_usuario_jogo){
 
 	$response = $db->getFotos($id_usuario_jogo);
 	
-	echoRespnse(200, $response);
+	echoResponse(200, $response);
 });
 
 
 /*
  * ------------------------ METHODS WITH AUTHENTICATION ------------------------
  */
-
-/**
- * Listing all tasks of particual user
- * method GET
- * url /tasks          
- */
-$app->get('/tasks', 'authenticate', function() {
-            global $user_id;
-            $response = array();
-            $db = new DbHandler();
-
-            // fetching all user tasks
-            $result = $db->getAllUserTasks($user_id);
-
-            $response["error"] = false;
-            $response["tasks"] = array();
-
-            // looping through result and preparing tasks array
-            while ($task = $result->fetch_assoc()) {
-                $tmp = array();
-                $tmp["id"] = $task["id"];
-                $tmp["task"] = $task["task"];
-                $tmp["status"] = $task["status"];
-                $tmp["createdAt"] = $task["created_at"];
-                array_push($response["tasks"], $tmp);
-            }
-
-            echoRespnse(200, $response);
-        });
-
-/**
- * Listing single task of particual user
- * method GET
- * url /tasks/:id
- * Will return 404 if the task doesn't belongs to user
- */
-$app->get('/tasks/:id', 'authenticate', function($task_id) {
-            global $user_id;
-            $response = array();
-            $db = new DbHandler();
-
-            // fetch task
-            $result = $db->getTask($task_id, $user_id);
-
-            if ($result != NULL) {
-                $response["error"] = false;
-                $response["id"] = $result["id"];
-                $response["task"] = $result["task"];
-                $response["status"] = $result["status"];
-                $response["createdAt"] = $result["created_at"];
-                echoRespnse(200, $response);
-            } else {
-                $response["error"] = true;
-                $response["message"] = "The requested resource doesn't exists";
-                echoRespnse(404, $response);
-            }
-        });
-
-/**
- * Creating new task in db
- * method POST
- * params - name
- * url - /tasks/
- */
-$app->post('/tasks', 'authenticate', function() use ($app) {
-            // check for required params
-            verifyRequiredParams(array('task'));
-
-            $response = array();
-            $task = $app->request->post('task');
-
-            global $user_id;
-            $db = new DbHandler();
-
-            // creating new task
-            $task_id = $db->createTask($user_id, $task);
-
-            if ($task_id != NULL) {
-                $response["error"] = false;
-                $response["message"] = "Task created successfully";
-                $response["task_id"] = $task_id;
-                echoRespnse(201, $response);
-            } else {
-                $response["error"] = true;
-                $response["message"] = "Failed to create task. Please try again";
-                echoRespnse(200, $response);
-            }            
-        });
-
-/**
- * Updating existing task
- * method PUT
- * params task, status
- * url - /tasks/:id
- */
-$app->put('/tasks/:id', 'authenticate', function($task_id) use($app) {
-            // check for required params
-            verifyRequiredParams(array('task', 'status'));
-
-            global $user_id;            
-            $task = $app->request->put('task');
-            $status = $app->request->put('status');
-
-            $db = new DbHandler();
-            $response = array();
-
-            // updating task
-            $result = $db->updateTask($user_id, $task_id, $task, $status);
-            if ($result) {
-                // task updated successfully
-                $response["error"] = false;
-                $response["message"] = "Task updated successfully";
-            } else {
-                // task failed to update
-                $response["error"] = true;
-                $response["message"] = "Task failed to update. Please try again!";
-            }
-            echoRespnse(200, $response);
-        });
-
-/**
- * Deleting task. Users can delete only their tasks
- * method DELETE
- * url /tasks
- */
-$app->delete('/tasks/:id', 'authenticate', function($task_id) use($app) {
-            global $user_id;
-
-            $db = new DbHandler();
-            $response = array();
-            $result = $db->deleteTask($user_id, $task_id);
-            if ($result) {
-                // task deleted successfully
-                $response["error"] = false;
-                $response["message"] = "Task deleted succesfully";
-            } else {
-                // task failed to delete
-                $response["error"] = true;
-                $response["message"] = "Task failed to delete. Please try again!";
-            }
-            echoRespnse(200, $response);
-        });
 
 /**
  * Verifying required params posted or not
@@ -938,7 +789,7 @@ function verifyRequiredParams($required_fields) {
         $app = \Slim\Slim::getInstance();
         $response["error"] = true;
         $response["message"] = 'Campos necessários: (' . substr($error_fields, 0, -2) . ') não informado(s).';
-        echoRespnse(200, $response);
+        echoResponse(200, $response);
         $app->stop();
     }
 }
@@ -951,7 +802,7 @@ function validateEmail($email) {
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $response["error"] = true;
         $response["message"] = 'Endereço de e-mail inválido!';
-        echoRespnse(200, $response);
+        echoResponse(200, $response);
         $app->stop();
     }
 }
@@ -961,7 +812,7 @@ function validateEmail($email) {
  * @param String $status_code Http response code
  * @param Int $response Json response
  */
-function echoRespnse($status_code, $response) {
+function echoResponse($status_code, $response) {
     $app = \Slim\Slim::getInstance();
     // Http response code
     $app->status($status_code);
