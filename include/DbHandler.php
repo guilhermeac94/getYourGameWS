@@ -1206,6 +1206,8 @@ class DbHandler {
 							and ujo.id_estado_jogo is null))
 							
 							and ujs.id_usuario = $id_usuario
+							and ujs.ativo = 1
+							and ujo.ativo = 1
 							
 						  order by ujo.id_estado_jogo desc)
 							
@@ -1256,6 +1258,8 @@ class DbHandler {
 							and ujo.id_estado_jogo is null))
 							
 							and ujs.id_usuario = $id_usuario
+							and ujs.ativo = 1
+							and ujo.ativo = 1
 							
 						  order by ujo.id_estado_jogo desc)
 						  
@@ -1308,6 +1312,8 @@ class DbHandler {
 							and ujo.id_estado_jogo is null))
 							
 							and ujs.id_usuario = $id_usuario
+							and ujs.ativo = 1
+							and ujo.ativo = 1
 							
 						  order by ujo.id_estado_jogo desc) 
 						
@@ -1362,6 +1368,8 @@ class DbHandler {
 							and ujo.id_estado_jogo is null))
 							
 							and ujs.id_usuario = $id_usuario
+							and ujs.ativo = 1
+							and ujo.ativo = 1
 							
 						  order by ujo.id_estado_jogo desc)
 				  
@@ -1409,6 +1417,8 @@ class DbHandler {
 							and ifnull(ujs.id_estado_jogo, us.id_estado_jogo) = ujo.id_estado_jogo
 							
 							and ujs.id_usuario = $id_usuario
+							and ujs.ativo = 1
+							and ujo.ativo = 1
 							
 						  order by ujo.id_estado_jogo desc, ujo.preco)
 							
@@ -1458,6 +1468,8 @@ class DbHandler {
 							and ujo.id_estado_jogo is not null
 							
 							and ujs.id_usuario = $id_usuario
+							and ujs.ativo = 1
+							and ujo.ativo = 1
 							
 						  order by ujo.id_estado_jogo desc, ujo.preco)
 						  
@@ -1506,6 +1518,8 @@ class DbHandler {
 							and ujo.id_estado_jogo is null
 							
 							and ujs.id_usuario = $id_usuario
+							and ujs.ativo = 1
+							and ujo.ativo = 1
 							
 						  order by ujo.preco)
 						
