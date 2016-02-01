@@ -858,10 +858,10 @@ class DbHandler {
 						us.id_usuario,
 						(select mes.descricao from metodo_envio mes where mes.id_metodo_envio = ifnull(t.id_metodo_envio_solicitante, us.id_metodo_envio)) as metodo_envio,
 						us.nome,
-						js.descricao as descricao_jogo,
-						ps.descricao as plataforma_jogo,
+						jt.descricao as descricao_jogo,
+						pt.descricao as plataforma_jogo,
 						(select ejs.descricao from estado_jogo ejs where ejs.id_estado_jogo = ujs.id_estado_jogo) as estado_jogo,
-						js.foto as foto_jogo,
+						jt.foto as foto_jogo,
 						ujs.id_usuario_jogo,
 						(select count(0) from foto fs where fs.id_usuario_jogo = ujs.id_usuario_jogo) qtd_foto,
 						
@@ -869,24 +869,23 @@ class DbHandler {
 						uo.id_usuario as id_usuario_ofert,
 						(select meo.descricao from metodo_envio meo where meo.id_metodo_envio = ifnull(t.id_metodo_envio_ofertante, uo.id_metodo_envio)) as metodo_envio_ofert,
 						uo.nome as nome_ofert,
-						jo.id_jogo as id_jogo_ofert,
-						jo.descricao as descricao_jogo_ofert,
-						po.descricao as plataforma_jogo_ofert,
+						js.id_jogo as id_jogo_ofert,
+						js.descricao as descricao_jogo_ofert,
+						ps.descricao as plataforma_jogo_ofert,
 						(select ejo.descricao from estado_jogo ejo where ejo.id_estado_jogo = ujo.id_estado_jogo) as estado_jogo_ofert,
-						jo.foto as foto_jogo_ofert,
+						js.foto as foto_jogo_ofert,
 						ujo.preco as preco_jogo_ofert,
 						ujo.id_usuario_jogo as id_usuario_jogo_ofert,
 						(select count(0) from foto fo where fo.id_usuario_jogo = ujo.id_usuario_jogo) qtd_foto_ofert
 					from 
-						usuario_jogo ujs,
 						usuario_jogo ujo,
 						usuario us,
 						usuario uo,						
 						jogo js,
-						jogo jo,
 						plataforma ps,
-						plataforma po,
-						transacao t
+						transacao t,
+						usuario_jogo ujs  left outer join jogo jt on ujs.id_jogo_troca = jt.id_jogo
+										  left outer join plataforma pt on ujs.id_plataforma_troca = pt.id_plataforma
 					where 
 						ujs.id_usuario_jogo = t.id_usuario_jogo_solicitante and 
 						ujs.id_usuario = us.id_usuario and
@@ -894,8 +893,6 @@ class DbHandler {
 						ujs.id_plataforma = ps.id_plataforma and
 						ujo.id_usuario_jogo = t.id_usuario_jogo_ofertante and
 						ujo.id_usuario = uo.id_usuario and 
-						ujo.id_jogo = jo.id_jogo and
-						ujo.id_plataforma = po.id_plataforma and
 						t.id_transacao = ".$id_transacao;
 						
 		$stmt = $this->conn->prepare($sql);
@@ -1062,10 +1059,10 @@ class DbHandler {
 						us.id_usuario,
 						(select mes.descricao from metodo_envio mes where mes.id_metodo_envio = us.id_metodo_envio) as metodo_envio,
 						us.nome,
-						js.descricao as descricao_jogo,
-						ps.descricao as plataforma_jogo,
+						jt.descricao as descricao_jogo,
+						pt.descricao as plataforma_jogo,
 						(select ejs.descricao from estado_jogo ejs where ejs.id_estado_jogo = ujs.id_estado_jogo) as estado_jogo,
-						js.foto as foto_jogo,
+						jt.foto as foto_jogo,
 						ujs.id_usuario_jogo,
 						(select count(0) from foto fs where fs.id_usuario_jogo = ujs.id_usuario_jogo) qtd_foto,
 						
@@ -1073,34 +1070,34 @@ class DbHandler {
 						uo.id_usuario as id_usuario_ofert,
 						(select meo.descricao from metodo_envio meo where meo.id_metodo_envio = uo.id_metodo_envio) as metodo_envio_ofert,
 						uo.nome as nome_ofert,
-						jo.id_jogo as id_jogo_ofert,
-						jo.descricao as descricao_jogo_ofert,
-						po.descricao as plataforma_jogo_ofert,
+						js.id_jogo as id_jogo_ofert,
+						js.descricao as descricao_jogo_ofert,
+						ps.descricao as plataforma_jogo_ofert,
 						(select ejo.descricao from estado_jogo ejo where ejo.id_estado_jogo = ujo.id_estado_jogo) as estado_jogo_ofert,
-						jo.foto as foto_jogo_ofert,
+						js.foto as foto_jogo_ofert,
 						ujo.preco as preco_jogo_ofert,
 						ujo.id_usuario_jogo as id_usuario_jogo_ofert,
 						(select count(0) from foto fo where fo.id_usuario_jogo = ujo.id_usuario_jogo) qtd_foto_ofert
 					from 
-						usuario_jogo ujs,
 						usuario_jogo ujo,
 						usuario us,
 						usuario uo,						
 						jogo js,
-						jogo jo,
 						plataforma ps,
-						plataforma po
+						usuario_jogo ujs left outer join jogo jt on ujs.id_jogo_troca = jt.id_jogo
+										 left outer join plataforma pt on ujs.id_plataforma_troca = pt.id_plataforma
 					where 
 						ujs.id_usuario_jogo = ".$id_usuario_jogo_solic." and 
 						ujs.id_usuario = us.id_usuario and
-						ujs.id_jogo = js.id_jogo and
-						ujs.id_plataforma = ps.id_plataforma and
+						
 						ujo.id_usuario_jogo = ".$id_usuario_jogo_ofert." and
 						ujo.id_usuario = uo.id_usuario and 
-						ujo.id_jogo = jo.id_jogo and
-						ujo.id_plataforma = po.id_plataforma and
+						
 						ujs.ativo = 1 and
-						ujo.ativo = 1";
+						ujo.ativo = 1 and
+						
+						ujs.id_jogo = js.id_jogo and
+						ujs.id_plataforma = ps.id_plataforma";
 						
 		$stmt = $this->conn->prepare($sql);
 		$stmt->execute();
