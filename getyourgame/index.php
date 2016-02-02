@@ -526,6 +526,9 @@ $app->put('/transacao/:id', function($id_transacao) use($app) {
 	if($app->request->put('id_estado_transacao')!==null){
 		if($obj['id_estado_transacao'] == 3){
 			$db->deletaInteresses($id_transacao);
+			
+		}elseif($obj['id_estado_transacao'] == 2){
+			$db->deletaOutrasTransacoes($id_transacao);
 		}
 	}
 	

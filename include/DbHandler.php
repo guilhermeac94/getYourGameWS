@@ -264,6 +264,25 @@ class DbHandler {
 		return $result;
 	}
 	
+	public function deletaOutrasTransacoes($id_transacao){
+				
+		$sql = "select t1.id_transacao
+				  from transacao t1,
+					   transacao t2
+				 where t1.id_usuario_jogo_ofertante = t2.id_usuario_jogo_ofertante
+				   and t1.id_usuario_jogo_solicitante <> t2.id_usuario_jogo_solicitante
+				   and t1.id_estado_transacao = 1
+				   and t2.id_transacao = $id_transacao";
+        
+		$stmt = $this->conn->prepare($sql);
+        if ($stmt->execute()) {
+            $trans = $stmt->get_result()->fetch_assoc();
+            $stmt->close();
+			
+			$result = $this->delete('transacao', array('id_transacao' => $trans["id_transacao"]), false);
+		}	
+	}
+	
 	public function deletaInteresses($id_transacao){
 		$sql = "select id_usuario_jogo_solicitante,
 					   id_usuario_jogo_ofertante
