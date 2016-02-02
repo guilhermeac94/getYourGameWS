@@ -1148,7 +1148,11 @@ class DbHandler {
 						foto_jogo_ofert,
 						preco_jogo_ofert,
 						id_usuario_jogo_ofert,	   
-						ifnull((select 1 from transacao t where (t.id_usuario_jogo_solicitante = info.id_usuario_jogo and t.id_usuario_jogo_ofertante = info.id_usuario_jogo_ofert)),0) as existe_transacao
+						ifnull((select 1
+								  from transacao t
+								 where (t.id_usuario_jogo_solicitante = info.id_usuario_jogo and
+										t.id_usuario_jogo_ofertante = info.id_usuario_jogo_ofert and
+										t.id_estado_transacao <> 4)),0) as existe_transacao
 
 				  from  (
 						
@@ -1522,8 +1526,8 @@ class DbHandler {
 						  
 				  where not exists (select 1
 									  from transacao t
-									 where (t.id_usuario_jogo_solicitante = info.id_usuario_jogo and t.id_usuario_jogo_ofertante = info.id_usuario_jogo_ofert)
-									   and t.id_estado_transacao <> 1)
+									 where t.id_usuario_jogo_ofertante = info.id_usuario_jogo_ofert
+									   and t.id_estado_transacao not in (1,4))
 				  order by prioridade";
 		
 		$stmt = $this->conn->prepare($sql);
